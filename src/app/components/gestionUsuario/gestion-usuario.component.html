@@ -1,0 +1,144 @@
+<div class="management-container">
+    <header class="page-header">
+        <div class="header-info">
+            <div class="header-top">
+                <button class="btn-back" (click)="volverAlDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Gestión de Usuarios</h1>
+            </div>
+            <p>Administre las cuentas, roles y estados de los usuarios del sistema.</p>
+        </div>
+        <button class="btn-add" (click)="openModal()">
+            <i class="fas fa-plus"></i>
+            Nuevo Usuario
+        </button>
+    </header>
+
+    <div class="controls-card">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar por usuario o rol..." [(ngModel)]="searchTerm"
+                (input)="applyFilter()">
+        </div>
+        <div class="filters">
+            <select class="select-filter" [(ngModel)]="selectedRole" (change)="applyFilter()">
+                <option value="">Todos los Roles</option>
+                <option value="ADMIN">Administrador</option>
+                <option value="MEDICO">Médico</option>
+                <option value="USUARIO">Paciente</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-card">
+        @if (isLoading) {
+        <div class="loader-state">
+            <div class="spinner"></div>
+            <p>Cargando usuarios...</p>
+        </div>
+        } @else if (errorMessage) {
+        <div class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ errorMessage }}</p>
+            <button (click)="cargarUsuarios()" class="btn-retry">Reintentar</button>
+        </div>
+        } @else {
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Fecha Registro</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (usuario of filteredUsuarios; track usuario.idUsuario) {
+                    <tr>
+                        <td class="id-col">#{{ usuario.idUsuario }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-sm">{{ usuario.username.charAt(0).toUpperCase() }}</div>
+                                <span>{{ usuario.username }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge" [class]="usuario.rolNombre.toLowerCase()">
+                                {{ usuario.rolNombre.replace('ROLE_', '') }}
+                            </span>
+                        </td>
+                        <td class="date-col">{{ usuario.fechaCreacion | date:'mediumDate' }}</td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" [checked]="usuario.estado" (change)="toggleEstado(usuario)">
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td class="actions-col">
+                            <div class="action-buttons">
+                                <button class="btn-icon edit" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="btn-icon delete" title="Eliminar"
+                                    (click)="deleteUsuario(usuario.idUsuario!)"><i
+                                        class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            No se encontraron usuarios que coincidan con la búsqueda.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+
+    @if (showModal) {
+    <div class="modal-backdrop" (click)="closeModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h2>
+                <button class="btn-close" (click)="closeModal()">&times;</button>
+            </header>
+
+            <form (submit)="registrarUsuario(); $event.preventDefault()" class="modal-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nombre de Usuario</label>
+                    <input type="text" name="username" [(ngModel)]="nuevoUsuario.username" placeholder="Ej: jdoe20"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                    <input type="password" name="password" [(ngModel)]="nuevoUsuario.password"
+                        placeholder="Mínimo 6 caracteres" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-user-tag"></i> Asignar Rol</label>
+                    <select name="rolId" [(ngModel)]="nuevoUsuario.rolId">
+                        <option [value]="1">Administrador</option>
+                        <option [value]="2">Médico</option>
+                        <option [value]="3">Paciente / Usuario</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                        @if (isSaving) { <div class="btn-spinner"></div> }
+                        @else { Registrar Usuario }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+</div>

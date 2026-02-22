@@ -1,0 +1,35 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="role-badge">{{ role }}</div>
+    </div>
+
+    <ul class="nav-links">
+        <li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <a routerLink="/">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+
+        <ng-container *ngIf="role === 'ADMIN'">
+            <li routerLinkActive="active"><a routerLink="/usuarios"><i
+                        class="fas fa-users-cog"></i><span>Usuarios</span></a></li>
+            <li><a href="#"><i class="fas fa-user-md"></i><span>Médicos</span></a></li>
+            <li><a href="#"><i class="fas fa-hospital"></i><span>Especialidades</span></a></li>
+        </ng-container>
+
+        <ng-container *ngIf="role === 'MEDICO'">
+            <li><a href="#"><i class="fas fa-calendar-alt"></i><span>Mi Agenda</span></a></li>
+            <li><a href="#"><i class="fas fa-procedures"></i><span>Pacientes</span></a></li>
+        </ng-container>
+
+        <ng-container *ngIf="role === 'USUARIO'">
+            <li><a href="#"><i class="fas fa-calendar-plus"></i><span>Nueva Cita</span></a></li>
+            <li><a href="#"><i class="fas fa-history"></i><span>Mis Citas</span></a></li>
+        </ng-container>
+
+        <li class="nav-bottom">
+            <a href="#"><i class="fas fa-cog"></i><span>Ajustes</span></a>
+        </li>
+    </ul>
+</aside>

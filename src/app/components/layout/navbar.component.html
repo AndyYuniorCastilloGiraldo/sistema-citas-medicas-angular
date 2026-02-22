@@ -1,0 +1,15 @@
+<nav class="navbar">
+    <div class="logo">
+        <i class="fas fa-heartbeat"></i>
+        <span>MedicConnect</span>
+    </div>
+    <div class="user-info">
+        <span class="username">{{ username }}</span>
+        <div class="avatar">
+            {{ username?.charAt(0)?.toUpperCase() }}
+        </div>
+        <button (click)="logout()" class="btn-logout" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+</nav>

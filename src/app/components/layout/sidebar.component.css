@@ -1,0 +1,71 @@
+.sidebar {
+    width: 260px;
+    background: #1e293b;
+    height: calc(100vh - 70px);
+    color: white;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Outfit', sans-serif;
+}
+
+.sidebar-header {
+    padding: 0 25px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.role-badge {
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.nav-links li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 25px;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 15px;
+}
+
+.nav-links li a:hover,
+.nav-links li.active a {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-links li.active a {
+    border-left: 4px solid #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    color: #fff;
+}
+
+.nav-links li a i {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-bottom {
+    margin-top: auto;
+    padding-bottom: 20px;
+}

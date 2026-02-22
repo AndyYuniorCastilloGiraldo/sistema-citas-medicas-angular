@@ -1,0 +1,21 @@
+<div class="main-layout">
+    <app-navbar></app-navbar>
+
+    <div class="content-wrapper">
+        <app-sidebar></app-sidebar>
+
+        <main class="main-content">
+            <div [ngSwitch]="role" class="dashboard-shell">
+                <app-admin-dashboard *ngSwitchCase="'ADMIN'"></app-admin-dashboard>
+                <app-medico-dashboard *ngSwitchCase="'MEDICO'"></app-medico-dashboard>
+                <app-patient-dashboard *ngSwitchCase="'USUARIO'"></app-patient-dashboard>
+
+                <div *ngSwitchDefault class="error-state">
+                    <i class="fas fa-user-lock"></i>
+                    <h3>Rol no reconocido</h3>
+                    <p>No tiene permisos para acceder a este panel. Contacte al administrador.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
