@@ -14,8 +14,11 @@
         <ng-container *ngIf="role === 'ADMIN'">
             <li routerLinkActive="active"><a routerLink="/usuarios"><i
                         class="fas fa-users-cog"></i><span>Usuarios</span></a></li>
+            <li routerLinkActive="active"><a routerLink="/pacientes"><i
+                        class="fas fa-procedures"></i><span>Pacientes</span></a></li>
             <li><a href="#"><i class="fas fa-user-md"></i><span>Médicos</span></a></li>
-            <li><a href="#"><i class="fas fa-hospital"></i><span>Especialidades</span></a></li>
+            <li routerLinkActive="active"><a routerLink="/especialidades"><i
+                        class="fas fa-hospital"></i><span>Especialidades</span></a></li>
         </ng-container>
 
         <ng-container *ngIf="role === 'MEDICO'">

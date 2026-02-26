@@ -1,0 +1,170 @@
+<div class="management-container">
+    <header class="page-header">
+        <div class="header-info">
+            <div class="header-top">
+                <button class="btn-back" (click)="volverAlDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Gestión de Pacientes</h1>
+            </div>
+            <p>Administre la información personal y de contacto de los pacientes.</p>
+        </div>
+        <button class="btn-add" (click)="openModal()">
+            <i class="fas fa-plus"></i>
+            Nuevo Paciente
+        </button>
+    </header>
+
+    <div class="controls-card">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar por nombre, apellidos, DNI o correo..." [(ngModel)]="searchTerm"
+                (input)="applyFilter()">
+        </div>
+    </div>
+
+    <div class="table-card">
+        @if (errorMessage) {
+        <div class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ errorMessage }}</p>
+            <button (click)="cargarPacientes()" class="btn-retry">Reintentar</button>
+        </div>
+        } @else {
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Paciente</th>
+                        <th>DNI</th>
+                        <th>Contacto</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (paciente of filteredPacientes; track paciente.idPaciente) {
+                    <tr>
+                        <td class="id-col">#{{ paciente.idPaciente }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-sm">{{ (paciente.nombres || '').charAt(0).toUpperCase() }}</div>
+                                <div class="name-info">
+                                    <span class="full-name">{{ paciente.nombres }} {{ paciente.apellidos }}</span>
+                                    <span class="sub-text">{{ paciente.correo }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ paciente.dni }}</td>
+                        <td>
+                            <div class="contact-info">
+                                <span><i class="fas fa-phone"></i> {{ paciente.telefono }}</span>
+                                <span class="sub-text"><i class="fas fa-map-marker-alt"></i> {{ paciente.direccion
+                                    }}</span>
+                            </div>
+                        </td>
+                        <td class="date-col">{{ paciente.fechaRegistro | date:'mediumDate' }}</td>
+                        <td class="actions-col">
+                            <div class="action-buttons">
+                                <button class="btn-icon edit" title="Editar" (click)="openModal(paciente)"><i
+                                        class="fas fa-edit"></i></button>
+                                <button class="btn-icon delete" title="Eliminar"
+                                    (click)="deletePaciente(paciente.idPaciente)"><i
+                                        class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    @if (!isLoading) {
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            No se encontraron pacientes que coincidan con la búsqueda.
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+
+    @if (showModal) {
+    <div class="modal-backdrop" (click)="closeModal()">
+        <div class="premium-modal modal-large" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2><i class="fas" [class.fa-user-plus]="!isEditing" [class.fa-user-edit]="isEditing"></i>
+                    {{ isEditing ? 'Editar Paciente' : 'Registrar Nuevo Paciente' }}
+                </h2>
+                <button class="btn-close" (click)="closeModal()">&times;</button>
+            </header>
+
+            <form (submit)="guardarPaciente(); $event.preventDefault()" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nombres</label>
+                        <input type="text" name="nombres" [(ngModel)]="nuevoPaciente.nombres" placeholder="Ej: Juan"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Apellidos</label>
+                        <input type="text" name="apellidos" [(ngModel)]="nuevoPaciente.apellidos"
+                            placeholder="Ej: Pérez" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> DNI</label>
+                        <input type="text" name="dni" [(ngModel)]="nuevoPaciente.dni" placeholder="8 dígitos" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Teléfono</label>
+                        <input type="text" name="telefono" [(ngModel)]="nuevoPaciente.telefono"
+                            placeholder="Ej: 987654321">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                    <input type="email" name="correo" [(ngModel)]="nuevoPaciente.correo"
+                        placeholder="ejemplo@correo.com">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-map-marked-alt"></i> Dirección</label>
+                    <input type="text" name="direccion" [(ngModel)]="nuevoPaciente.direccion"
+                        placeholder="Calle, Distrito, Ciudad">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        {{ isEditing ? 'Actualizar' : 'Registrar' }} Paciente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+
+    @if (showDeleteModal) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <div class="delete-modal-content">
+                <div class="delete-icon-box">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h3>¿Confirmar Eliminación?</h3>
+                <p>Esta acción no se puede deshacer. El paciente será eliminado permanentemente del sistema.</p>
+                <div class="modal-actions">
+                    <button class="btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                    <button class="btn-primary" style="background: #ef4444;" (click)="confirmDelete()">Eliminar
+                        Paciente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>

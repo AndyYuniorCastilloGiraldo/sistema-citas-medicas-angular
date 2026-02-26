@@ -8,25 +8,25 @@ import { EspecialidadRequest, EspecialidadResponse } from '../models/especialida
 })
 export class EspecialidadService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/api/especialidad';
+    private apiUrl = 'http://localhost:8080/api/especialidades';
 
     listar(): Observable<EspecialidadResponse[]> {
-        return this.http.get<EspecialidadResponse[]>(this.apiUrl);
+        return this.http.get<EspecialidadResponse[]>(`${this.apiUrl}/listar`);
     }
 
     obtenerPorId(id: number): Observable<EspecialidadResponse> {
-        return this.http.get<EspecialidadResponse>(`${this.apiUrl}/${id}`);
+        return this.http.get<EspecialidadResponse>(`${this.apiUrl}/obtener/${id}`);
     }
 
     crear(request: EspecialidadRequest): Observable<EspecialidadResponse> {
-        return this.http.post<EspecialidadResponse>(this.apiUrl, request);
+        return this.http.post<EspecialidadResponse>(`${this.apiUrl}/registrar`, request);
     }
 
     actualizar(id: number, request: EspecialidadRequest): Observable<EspecialidadResponse> {
-        return this.http.put<EspecialidadResponse>(`${this.apiUrl}/${id}`, request);
+        return this.http.put<EspecialidadResponse>(`${this.apiUrl}/actualizar/${id}`, request);
     }
 
     eliminar(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+        return this.http.delete<void>(`${this.apiUrl}/eliminar/${id}`);
     }
 }

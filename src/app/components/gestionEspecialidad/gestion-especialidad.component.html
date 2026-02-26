@@ -1,0 +1,146 @@
+<div class="management-container">
+    <header class="page-header">
+        <div class="header-info">
+            <div class="header-top">
+                <button class="btn-back" (click)="volverAlDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Gestión de Especialidades</h1>
+            </div>
+            <p>Administre las especialidades médicas disponibles en el sistema.</p>
+        </div>
+        <button class="btn-add" (click)="openModal()">
+            <i class="fas fa-plus"></i>
+            Nueva Especialidad
+        </button>
+    </header>
+
+    <div class="controls-card">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar por nombre o descripción..." [(ngModel)]="searchTerm"
+                (input)="applyFilter()">
+        </div>
+    </div>
+
+    <div class="table-card">
+        @if (isLoading) {
+        <div class="table-loader-overlay">
+            <div class="mini-spinner"></div>
+            <p>Sincronizando especialidades...</p>
+        </div>
+        }
+
+        @if (errorMessage) {
+        <div class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ errorMessage }}</p>
+            <button (click)="cargarEspecialidades()" class="btn-retry">Reintentar</button>
+        </div>
+        } @else {
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (especialidad of filteredEspecialidades; track especialidad.idEspecialidad) {
+                    <tr>
+                        <td class="id-col">#{{ especialidad.idEspecialidad }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <span class="primary-text">{{ especialidad.nombre }}</span>
+                            </div>
+                        </td>
+                        <td>{{ especialidad.descripcion }}</td>
+                        <td class="actions-col">
+                            <div class="action-buttons">
+                                <button class="btn-icon edit" title="Editar" (click)="openModal(especialidad)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon delete" title="Eliminar"
+                                    (click)="deleteEspecialidad(especialidad.idEspecialidad)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    @if (!isLoading) {
+                    <tr>
+                        <td colspan="4" class="empty-row">
+                            No se encontraron especialidades que coincidan con la búsqueda.
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+
+    <!-- Modal para Agregar/Editar Especialidad -->
+    @if (showModal) {
+    <div class="modal-backdrop" (click)="closeModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2>
+                    <i class="fas" [class.fa-plus-circle]="!isEditing" [class.fa-edit]="isEditing"></i>
+                    {{ isEditing ? 'Editar Especialidad' : 'Nueva Especialidad' }}
+                </h2>
+                <button class="btn-close" (click)="closeModal()">&times;</button>
+            </header>
+
+            <form (submit)="guardarEspecialidad(); $event.preventDefault()" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-hospital"></i> Nombre de la Especialidad</label>
+                        <input type="text" name="nombre" [(ngModel)]="nuevaEspecialidad.nombre"
+                            placeholder="Ej: Cardiología" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-align-left"></i> Descripción</label>
+                        <textarea name="descripcion" [(ngModel)]="nuevaEspecialidad.descripcion"
+                            placeholder="Breve descripción de la especialidad..." rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                        @if (isSaving) { <div class="btn-spinner"></div> }
+                        @else { {{ isEditing ? 'Guardar Cambios' : 'Registrar Especialidad' }} }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+
+    <!-- Modal de Confirmación de Eliminación -->
+    @if (showDeleteModal) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <div class="delete-modal-content">
+                <div class="delete-icon-box">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h3>¿Confirmar Eliminación?</h3>
+                <p>Esta acción no se puede deshacer. La especialidad será eliminada permanentemente del sistema.</p>
+                <div class="modal-actions">
+                    <button class="btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                    <button class="btn-primary" style="background: #ef4444;" (click)="confirmDelete()">Eliminar
+                        Especialidad</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>

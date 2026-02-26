@@ -8,25 +8,25 @@ import { PacienteRequest, PacienteResponse } from '../models/paciente.models';
 })
 export class PacienteService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/api/paciente';
+    private apiUrl = 'http://localhost:8080/api/pacientes';
 
     listar(): Observable<PacienteResponse[]> {
-        return this.http.get<PacienteResponse[]>(this.apiUrl);
+        return this.http.get<PacienteResponse[]>(`${this.apiUrl}/listar`);
     }
 
     obtenerPorId(id: number): Observable<PacienteResponse> {
-        return this.http.get<PacienteResponse>(`${this.apiUrl}/${id}`);
+        return this.http.get<PacienteResponse>(`${this.apiUrl}/obtener/${id}`);
     }
 
     crear(request: PacienteRequest): Observable<PacienteResponse> {
-        return this.http.post<PacienteResponse>(this.apiUrl, request);
+        return this.http.post<PacienteResponse>(`${this.apiUrl}/registrar`, request);
     }
 
     actualizar(id: number, request: PacienteRequest): Observable<PacienteResponse> {
-        return this.http.put<PacienteResponse>(`${this.apiUrl}/${id}`, request);
+        return this.http.put<PacienteResponse>(`${this.apiUrl}/actualizar/${id}`, request);
     }
 
     eliminar(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+        return this.http.delete<void>(`${this.apiUrl}/eliminar/${id}`);
     }
 }

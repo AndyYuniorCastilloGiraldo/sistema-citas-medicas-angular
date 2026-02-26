@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, of, timeout } from 'rxjs';
+import { catchError, finalize, of, timeout } from 'rxjs';
 import { UsuarioResponse, UsuarioRequest } from '../../models/usuario.models';
 import { UsuarioService } from '../../services/usuario.service';
 
@@ -26,7 +26,10 @@ export class GestionUsuarioComponent implements OnInit {
 
     // Modal State
     showModal: boolean = false;
+    showDeleteModal: boolean = false;
     isSaving: boolean = false;
+    selectedUsuarioId: number | null = null;
+    idToDelete: number | null = null;
     nuevoUsuario: UsuarioRequest = {
         username: '',
         password: '',
@@ -38,22 +41,22 @@ export class GestionUsuarioComponent implements OnInit {
     }
 
     cargarUsuarios(): void {
-  this.isLoading = true;
-  this.errorMessage = '';
+        this.isLoading = true;
+        this.errorMessage = '';
 
-  this.usuarioService.listar().subscribe({
-    next: (data) => {
-      this.usuarios = data;
-      this.applyFilter();
-      this.isLoading = false;
-    },
-    error: (err) => {
-      console.error(err);
-      this.errorMessage = 'Error al cargar usuarios.';
-      this.isLoading = false;
+        this.usuarioService.listar().pipe(
+            finalize(() => this.isLoading = false)
+        ).subscribe({
+            next: (data) => {
+                this.usuarios = Array.isArray(data) ? data : [];
+                this.applyFilter();
+            },
+            error: (err) => {
+                console.error(err);
+                this.errorMessage = 'Error al cargar usuarios.';
+            }
+        });
     }
-  });
-}
 
     applyFilter(): void {
         const term = this.searchTerm.toLowerCase();
@@ -87,15 +90,15 @@ export class GestionUsuarioComponent implements OnInit {
         if (!this.nuevoUsuario.username || !this.nuevoUsuario.password) return;
 
         this.isSaving = true;
-        this.usuarioService.registrar(this.nuevoUsuario).subscribe({
+        this.usuarioService.registrar(this.nuevoUsuario).pipe(
+            finalize(() => this.isSaving = false)
+        ).subscribe({
             next: () => {
                 this.showModal = false; // Asegurar cierre
                 this.cargarUsuarios();
-                this.isSaving = false;
             },
             error: (err) => {
                 console.error('Error registering user:', err);
-                this.isSaving = false;
                 alert('Error al registrar usuario. Inténtelo de nuevo.');
             }
         });
@@ -114,16 +117,29 @@ export class GestionUsuarioComponent implements OnInit {
     }
 
     deleteUsuario(id: number): void {
-        if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
-            this.usuarioService.eliminar(id).subscribe({
-                next: () => {
-                    this.usuarios = this.usuarios.filter(u => u.idUsuario !== id);
-                    this.applyFilter();
-                },
-                error: (err) => {
-                    console.error('Error deleting user:', err);
-                }
-            });
-        }
+        this.idToDelete = id;
+        this.showDeleteModal = true;
+    }
+
+    closeDeleteModal(): void {
+        this.showDeleteModal = false;
+        this.idToDelete = null;
+    }
+
+    confirmDelete(): void {
+        if (this.idToDelete === null) return;
+
+        this.usuarioService.eliminar(this.idToDelete).subscribe({
+            next: () => {
+                this.usuarios = this.usuarios.filter(u => u.idUsuario !== this.idToDelete);
+                this.applyFilter();
+                this.closeDeleteModal();
+            },
+            error: (err) => {
+                console.error('Error deleting user:', err);
+                alert('No se pudo eliminar el usuario.');
+                this.closeDeleteModal();
+            }
+        });
     }
 }

@@ -33,11 +33,13 @@
 
     <div class="table-card">
         @if (isLoading) {
-        <div class="loader-state">
-            <div class="spinner"></div>
-            <p>Cargando usuarios...</p>
+        <div class="table-loader-overlay">
+            <div class="mini-spinner"></div>
+            <p>Sincronizando usuarios...</p>
         </div>
-        } @else if (errorMessage) {
+        }
+
+        @if (errorMessage) {
         <div class="error-state">
             <i class="fas fa-exclamation-circle"></i>
             <p>{{ errorMessage }}</p>
@@ -62,7 +64,7 @@
                         <td class="id-col">#{{ usuario.idUsuario }}</td>
                         <td>
                             <div class="user-cell">
-                                <div class="avatar-sm">{{ usuario.username.charAt(0).toUpperCase() }}</div>
+                                <div class="avatar-sm">{{ (usuario.username || '').charAt(0).toUpperCase() }}</div>
                                 <span>{{ usuario.username }}</span>
                             </div>
                         </td>
@@ -88,11 +90,13 @@
                         </td>
                     </tr>
                     } @empty {
+                    @if (!isLoading) {
                     <tr>
                         <td colspan="6" class="empty-row">
                             No se encontraron usuarios que coincidan con la búsqueda.
                         </td>
                     </tr>
+                    }
                     }
                 </tbody>
             </table>
@@ -124,9 +128,9 @@
                 <div class="form-group">
                     <label><i class="fas fa-user-tag"></i> Asignar Rol</label>
                     <select name="rolId" [(ngModel)]="nuevoUsuario.rolId">
-                        <option [value]="1">Administrador</option>
-                        <option [value]="2">Médico</option>
-                        <option [value]="3">Paciente / Usuario</option>
+                        <option [ngValue]="1">Administrador</option>
+                        <option [ngValue]="2">Médico</option>
+                        <option [ngValue]="3">Paciente / Usuario</option>
                     </select>
                 </div>
 
@@ -138,6 +142,25 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+    }
+
+    @if (showDeleteModal) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <div class="delete-modal-content">
+                <div class="delete-icon-box">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h3>¿Confirmar Eliminación?</h3>
+                <p>Esta acción no se puede deshacer. El usuario será eliminado permanentemente del sistema.</p>
+                <div class="modal-actions">
+                    <button class="btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                    <button class="btn-primary" style="background: #ef4444;" (click)="confirmDelete()">Eliminar
+                        Usuario</button>
+                </div>
+            </div>
         </div>
     </div>
     }
