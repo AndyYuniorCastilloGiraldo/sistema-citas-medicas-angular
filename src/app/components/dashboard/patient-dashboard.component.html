@@ -1,6 +1,6 @@
 <div class="dashboard-content">
     <header class="content-header">
-        <h2>Hola de nuevo</h2>
+        <h2>Hola, {{ patientName }}</h2>
         <p>Bienvenido a su portal de salud personal</p>
     </header>
 
@@ -8,7 +8,7 @@
         <div class="banner-text">
             <h3>Agende su próxima cita en segundos</h3>
             <p>Encuentre a los mejores especialistas y reserve su turno de manera inmediata y sencilla.</p>
-            <button class="btn-banner">
+            <button class="btn-banner" (click)="nuevaCita()">
                 <span>Nueva Cita</span>
                 <i class="fas fa-arrow-right"></i>
             </button>
@@ -20,36 +20,47 @@
         </div>
     </div>
 
-    <div class="sections-grid">
+    <div class="full-width-section">
         <div class="card glass-card">
             <div class="card-header">
                 <h3>Mis Próximas Citas</h3>
-                <button class="icon-btn"><i class="fas fa-plus"></i></button>
+                <button class="icon-btn" (click)="nuevaCita()"><i class="fas fa-plus"></i></button>
             </div>
-            <div class="empty-state">
+
+            <!-- LOADING -->
+            <div *ngIf="isLoading" class="list-loader">
+                <div class="spinner-sm"></div>
+                <span>Actualizando agenda...</span>
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div *ngIf="!isLoading && misCitas.length === 0" class="empty-state">
                 <div class="icon-bg">
                     <i class="far fa-calendar-times"></i>
                 </div>
                 <p>No tiene citas programadas próximamente.</p>
-                <button class="btn-secondary">Explorar Médicos</button>
+                <button class="btn-secondary" (click)="nuevaCita()">Explorar Médicos</button>
             </div>
-        </div>
 
-        <div class="card glass-card">
-            <div class="card-header">
-                <h3>Resultados Recientes</h3>
-                <button class="btn-text">Ver todos</button>
-            </div>
-            <div class="results-list">
-                <div class="result-item">
-                    <div class="result-icon"><i class="fas fa-file-medical-alt"></i></div>
-                    <div class="info">
-                        <span class="title">Hemograma Completo</span>
-                        <span class="date">Actualizado hace 2 días</span>
+            <!-- APPOINTMENTS LIST -->
+            <div *ngIf="!isLoading && misCitas.length > 0" class="appointments-list">
+                <div *ngFor="let cita of misCitas" class="appt-item">
+                    <div class="appt-date">
+                        <span class="day">{{ cita.fecha | date:'dd' }}</span>
+                        <span class="month">{{ cita.fecha | date:'MMM' }}</span>
                     </div>
-                    <button class="btn-download" title="Descargar PDF">
-                        <i class="fas fa-cloud-download-alt"></i>
-                    </button>
+                    <div class="appt-info">
+                        <span class="doc-name">Dr. {{ cita.nombreMedico }}</span>
+                        <span class="motive">{{ cita.motivo }}</span>
+                        <div class="details">
+                            <span class="time"><i class="far fa-clock"></i> {{ cita.hora }}</span>
+                            <span class="obs" *ngIf="cita.observaciones"><i class="fas fa-info-circle"></i> {{
+                                cita.observaciones }}</span>
+                        </div>
+                    </div>
+                    <div class="appt-status">
+                        <span [ngClass]="getStatusClass(cita.estado)">{{ cita.estado }}</span>
+                    </div>
                 </div>
             </div>
         </div>

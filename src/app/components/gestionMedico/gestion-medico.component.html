@@ -7,14 +7,14 @@
                 <button class="btn-back" (click)="volverAlDashboard()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
-                <h1>Gestión de Pacientes</h1>
+                <h1>Gestión de Médicos</h1>
             </div>
-            <p>Administre el registro y datos de los pacientes del sistema.</p>
+            <p>Administre el personal médico, especialidades y datos de contacto.</p>
         </div>
 
         <button class="btn-add" (click)="openModal()">
             <i class="fas fa-plus"></i>
-            Nuevo Paciente
+            Nuevo Médico
         </button>
     </header>
 
@@ -22,7 +22,7 @@
     <div class="controls-card">
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Buscar por nombre, apellido o DNI..." [(ngModel)]="searchTerm"
+            <input type="text" placeholder="Buscar por nombre, CMP o especialidad..." [(ngModel)]="searchTerm"
                 (input)="applyFilter()">
         </div>
     </div>
@@ -33,14 +33,14 @@
         <!-- LOADING -->
         <div *ngIf="isLoading" class="loader-state">
             <div class="spinner"></div>
-            <p>Sincronizando pacientes...</p>
+            <p>Sincronizando médicos...</p>
         </div>
 
         <!-- ERROR -->
         <div *ngIf="errorMessage && !isLoading" class="error-state">
             <i class="fas fa-exclamation-circle"></i>
             <p>{{ errorMessage }}</p>
-            <button (click)="cargarPacientes()" class="btn-retry">Reintentar</button>
+            <button (click)="cargarMedicos()" class="btn-retry">Reintentar</button>
         </div>
 
         <!-- TABLA -->
@@ -49,39 +49,41 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Paciente</th>
-                        <th>DNI</th>
+                        <th>Médico</th>
+                        <th>CMP</th>
+                        <th>Especialidad</th>
                         <th>Teléfono</th>
-                        <th>Correo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let paciente of filteredPacientes">
-                        <td class="id-col">#{{ paciente.idPaciente }}</td>
+                    <tr *ngFor="let medico of filteredMedicos">
+                        <td class="id-col">#{{ medico.idMedico }}</td>
                         <td>
                             <div class="user-cell">
-                                <div class="avatar-sm">{{ paciente.nombres.charAt(0).toUpperCase() }}</div>
-                                <span>{{ paciente.nombres }} {{ paciente.apellidos }}</span>
+                                <div class="avatar-sm">{{ medico.nombres.charAt(0).toUpperCase() }}</div>
+                                <span>{{ medico.nombres }} {{ medico.apellidos }}</span>
                             </div>
                         </td>
-                        <td>{{ paciente.dni }}</td>
-                        <td>{{ paciente.telefono }}</td>
-                        <td>{{ paciente.correo }}</td>
+                        <td>{{ medico.cmp }}</td>
+                        <td>
+                            <span class="role-badge role_medico">{{ medico.nombreEspecialidad }}</span>
+                        </td>
+                        <td>{{ medico.telefono }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-icon edit" (click)="openEditModal(paciente)">
+                                <button class="btn-icon edit" (click)="openEditModal(medico)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-icon delete" (click)="deletePaciente(paciente.idPaciente)">
+                                <button class="btn-icon delete" (click)="deleteMedico(medico.idMedico)">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
 
-                    <tr *ngIf="filteredPacientes.length === 0">
-                        <td colspan="6" class="empty-row">No se encontraron pacientes.</td>
+                    <tr *ngIf="filteredMedicos.length === 0">
+                        <td colspan="6" class="empty-row">No se encontraron médicos.</td>
                     </tr>
 
                 </tbody>
@@ -93,35 +95,40 @@
     <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="premium-modal" (click)="$event.stopPropagation()">
             <header class="modal-header">
-                <h2>Registrar Nuevo Paciente</h2>
+                <h2>Registrar Nuevo Médico</h2>
                 <button class="btn-close" (click)="closeModal()">&times;</button>
             </header>
 
-            <form (ngSubmit)="registrarPaciente()" class="modal-form">
+            <form (ngSubmit)="registrarMedico()" class="modal-form">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nombres</label>
-                        <input type="text" name="nombres" [(ngModel)]="nuevoPaciente.nombres" required>
+                        <input type="text" name="nombres" [(ngModel)]="nuevoMedico.nombres" required>
                     </div>
                     <div class="form-group">
                         <label>Apellidos</label>
-                        <input type="text" name="apellidos" [(ngModel)]="nuevoPaciente.apellidos" required>
+                        <input type="text" name="apellidos" [(ngModel)]="nuevoMedico.apellidos" required>
                     </div>
                     <div class="form-group">
-                        <label>DNI</label>
-                        <input type="text" name="dni" [(ngModel)]="nuevoPaciente.dni" required>
+                        <label>CMP</label>
+                        <input type="text" name="cmp" [(ngModel)]="nuevoMedico.cmp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidad</label>
+                        <select name="idEspecialidad" [(ngModel)]="nuevoMedico.idEspecialidad" required>
+                            <option [ngValue]="0" disabled>Seleccione especialidad</option>
+                            <option *ngFor="let esp of especialidades" [ngValue]="esp.idEspecialidad">
+                                {{ esp.nombre }}
+                            </option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Teléfono</label>
-                        <input type="text" name="telefono" [(ngModel)]="nuevoPaciente.telefono">
+                        <input type="text" name="telefono" [(ngModel)]="nuevoMedico.telefono">
                     </div>
-                    <div class="form-group full-width">
+                    <div class="form-group">
                         <label>Correo Electrónico</label>
-                        <input type="email" name="correo" [(ngModel)]="nuevoPaciente.correo">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Dirección</label>
-                        <input type="text" name="direccion" [(ngModel)]="nuevoPaciente.direccion">
+                        <input type="email" name="correo" [(ngModel)]="nuevoMedico.correo">
                     </div>
                 </div>
 
@@ -134,7 +141,7 @@
                     <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
                     <button type="submit" class="btn-primary" [disabled]="isSaving">
                         <span *ngIf="isSaving" class="btn-spinner"></span>
-                        {{ isSaving ? 'Guardando...' : 'Registrar Paciente' }}
+                        {{ isSaving ? 'Guardando...' : 'Registrar Médico' }}
                     </button>
                 </div>
             </form>
@@ -142,38 +149,42 @@
     </div>
 
     <!-- MODAL EDITAR -->
-    <div *ngIf="showEditModal && pacienteEditar" class="modal-backdrop" (click)="closeEditModal()">
+    <div *ngIf="showEditModal && medicoEditar" class="modal-backdrop" (click)="closeEditModal()">
         <div class="premium-modal" (click)="$event.stopPropagation()">
             <header class="modal-header">
-                <h2>Editar Paciente</h2>
+                <h2>Editar Médico</h2>
                 <button class="btn-close" (click)="closeEditModal()">&times;</button>
             </header>
 
-            <form (ngSubmit)="actualizarPaciente()" class="modal-form">
+            <form (ngSubmit)="actualizarMedico()" class="modal-form">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nombres</label>
-                        <input type="text" name="editNombres" [(ngModel)]="pacienteEditar.nombres" required>
+                        <input type="text" name="editNombres" [(ngModel)]="medicoEditar.nombres" required>
                     </div>
                     <div class="form-group">
                         <label>Apellidos</label>
-                        <input type="text" name="editApellidos" [(ngModel)]="pacienteEditar.apellidos" required>
+                        <input type="text" name="editApellidos" [(ngModel)]="medicoEditar.apellidos" required>
                     </div>
                     <div class="form-group">
-                        <label>DNI</label>
-                        <input type="text" name="editDni" [(ngModel)]="pacienteEditar.dni" required>
+                        <label>CMP</label>
+                        <input type="text" name="editCmp" [(ngModel)]="medicoEditar.cmp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidad</label>
+                        <select name="editEspecialidad" [(ngModel)]="medicoEditar.idEspecialidad" required>
+                            <option *ngFor="let esp of especialidades" [ngValue]="esp.idEspecialidad">
+                                {{ esp.nombre }}
+                            </option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Teléfono</label>
-                        <input type="text" name="editTelefono" [(ngModel)]="pacienteEditar.telefono">
+                        <input type="text" name="editTelefono" [(ngModel)]="medicoEditar.telefono">
                     </div>
-                    <div class="form-group full-width">
+                    <div class="form-group">
                         <label>Correo Electrónico</label>
-                        <input type="email" name="editCorreo" [(ngModel)]="pacienteEditar.correo">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Dirección</label>
-                        <input type="text" name="editDireccion" [(ngModel)]="pacienteEditar.direccion">
+                        <input type="email" name="editCorreo" [(ngModel)]="medicoEditar.correo">
                     </div>
                 </div>
 
@@ -201,7 +212,7 @@
                 <p>Esta acción no se puede deshacer.</p>
                 <div class="modal-actions">
                     <button class="btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
-                    <button class="btn-primary btn-danger" (click)="confirmDelete()">Eliminar Paciente</button>
+                    <button class="btn-primary btn-danger" (click)="confirmDelete()">Eliminar Médico</button>
                 </div>
             </div>
         </div>

@@ -98,10 +98,8 @@
     backdrop-filter: blur(5px);
 }
 
-.sections-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 30px;
+.full-width-section {
+    width: 100%;
 }
 
 .card {
@@ -238,4 +236,140 @@
     font-weight: 700;
     cursor: pointer;
     font-size: 14px;
+}
+
+/* APPOINTMENTS LIST */
+.appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.appt-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.appt-item:hover {
+    transform: translateX(5px);
+    background: white;
+    border-color: #e2e8f0;
+}
+
+.appt-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 60px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.appt-date .day {
+    font-size: 1.2rem;
+    display: block;
+}
+
+.appt-date .month {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: block;
+}
+
+.appt-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.doc-name {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.motive {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.details {
+    display: flex;
+    gap: 20px;
+}
+
+.obs {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* STATUS BADGES */
+.appt-status span {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-completed {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.status-cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* LOADER */
+.list-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    gap: 15px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.spinner-sm {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f1f5f9;
+    border-top: 3px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

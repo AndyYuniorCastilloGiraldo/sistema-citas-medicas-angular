@@ -1,4 +1,6 @@
 <div class="management-container">
+
+    <!-- HEADER -->
     <header class="page-header">
         <div class="header-info">
             <div class="header-top">
@@ -9,44 +11,49 @@
             </div>
             <p>Administre las cuentas, roles y estados de los usuarios del sistema.</p>
         </div>
+
         <button class="btn-add" (click)="openModal()">
             <i class="fas fa-plus"></i>
             Nuevo Usuario
         </button>
     </header>
 
+    <!-- CONTROLES -->
     <div class="controls-card">
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Buscar por usuario o rol..." [(ngModel)]="searchTerm"
                 (input)="applyFilter()">
         </div>
+
         <div class="filters">
             <select class="select-filter" [(ngModel)]="selectedRole" (change)="applyFilter()">
                 <option value="">Todos los Roles</option>
-                <option value="ADMIN">Administrador</option>
-                <option value="MEDICO">Médico</option>
-                <option value="USUARIO">Paciente</option>
+                <option value="admin">Administrador</option>
+                <option value="medico">Médico</option>
+                <option value="usuario">Paciente</option>
             </select>
         </div>
     </div>
 
+    <!-- TABLA -->
     <div class="table-card">
-        @if (isLoading) {
-        <div class="table-loader-overlay">
-            <div class="mini-spinner"></div>
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loader-state">
+            <div class="spinner"></div>
             <p>Sincronizando usuarios...</p>
         </div>
-        }
 
-        @if (errorMessage) {
-        <div class="error-state">
+        <!-- ERROR -->
+        <div *ngIf="errorMessage && !isLoading" class="error-state">
             <i class="fas fa-exclamation-circle"></i>
             <p>{{ errorMessage }}</p>
             <button (click)="cargarUsuarios()" class="btn-retry">Reintentar</button>
         </div>
-        } @else {
-        <div class="table-responsive">
+
+        <!-- TABLA -->
+        <div *ngIf="!isLoading && !errorMessage" class="table-responsive">
             <table class="premium-table">
                 <thead>
                     <tr>
@@ -59,19 +66,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (usuario of filteredUsuarios; track usuario.idUsuario) {
-                    <tr>
+                    <tr *ngFor="let usuario of filteredUsuarios">
                         <td class="id-col">#{{ usuario.idUsuario }}</td>
                         <td>
                             <div class="user-cell">
-                                <div class="avatar-sm">{{ (usuario.username || '').charAt(0).toUpperCase() }}</div>
+                                <div class="avatar-sm">{{ usuario.username.charAt(0).toUpperCase() }}</div>
                                 <span>{{ usuario.username }}</span>
                             </div>
                         </td>
                         <td>
-                            <span class="role-badge" [class]="usuario.rolNombre.toLowerCase()">
-                                {{ usuario.rolNombre.replace('ROLE_', '') }}
-                            </span>
+                            <span class="role-badge">{{ usuario.rolNombre.replace('ROLE_', '') }}</span>
                         </td>
                         <td class="date-col">{{ usuario.fechaCreacion | date:'mediumDate' }}</td>
                         <td>
@@ -80,88 +84,119 @@
                                 <span class="slider round"></span>
                             </label>
                         </td>
-                        <td class="actions-col">
+                        <td>
                             <div class="action-buttons">
-                                <button class="btn-icon edit" title="Editar"><i class="fas fa-edit"></i></button>
-                                <button class="btn-icon delete" title="Eliminar"
-                                    (click)="deleteUsuario(usuario.idUsuario!)"><i
-                                        class="fas fa-trash-alt"></i></button>
+                                <button class="btn-icon edit" (click)="openEditModal(usuario)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon delete" (click)="deleteUsuario(usuario.idUsuario)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
-                    } @empty {
-                    @if (!isLoading) {
-                    <tr>
-                        <td colspan="6" class="empty-row">
-                            No se encontraron usuarios que coincidan con la búsqueda.
-                        </td>
+
+                    <tr *ngIf="filteredUsuarios.length === 0">
+                        <td colspan="6" class="empty-row">No se encontraron usuarios.</td>
                     </tr>
-                    }
-                    }
+
                 </tbody>
             </table>
         </div>
-        }
     </div>
 
-    @if (showModal) {
-    <div class="modal-backdrop" (click)="closeModal()">
+    <!-- MODAL REGISTRAR -->
+    <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
         <div class="premium-modal" (click)="$event.stopPropagation()">
             <header class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h2>
+                <h2>Registrar Nuevo Usuario</h2>
                 <button class="btn-close" (click)="closeModal()">&times;</button>
             </header>
 
-            <form (submit)="registrarUsuario(); $event.preventDefault()" class="modal-form">
+            <form (ngSubmit)="registrarUsuario()" class="modal-form">
                 <div class="form-group">
-                    <label><i class="fas fa-user"></i> Nombre de Usuario</label>
-                    <input type="text" name="username" [(ngModel)]="nuevoUsuario.username" placeholder="Ej: jdoe20"
-                        required>
+                    <label>Nombre de Usuario</label>
+                    <input type="text" name="username" [(ngModel)]="nuevoUsuario.username" required>
                 </div>
-
                 <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Contraseña</label>
-                    <input type="password" name="password" [(ngModel)]="nuevoUsuario.password"
-                        placeholder="Mínimo 6 caracteres" required>
+                    <label>Contraseña</label>
+                    <input type="password" name="password" [(ngModel)]="nuevoUsuario.password" required>
                 </div>
-
                 <div class="form-group">
-                    <label><i class="fas fa-user-tag"></i> Asignar Rol</label>
-                    <select name="rolId" [(ngModel)]="nuevoUsuario.rolId">
+                    <label>Asignar Rol</label>
+                    <select name="rolId" [(ngModel)]="nuevoUsuario.rolId" required>
                         <option [ngValue]="1">Administrador</option>
-                        <option [ngValue]="2">Médico</option>
-                        <option [ngValue]="3">Paciente / Usuario</option>
+                        <option [ngValue]="3">Médico</option>
+                        <option [ngValue]="2">Paciente</option>
                     </select>
+                </div>
+
+                <!-- MENSAJE DE ÉXITO -->
+                <div *ngIf="successMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i> {{ successMessage }}
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
                     <button type="submit" class="btn-primary" [disabled]="isSaving">
-                        @if (isSaving) { <div class="btn-spinner"></div> }
-                        @else { Registrar Usuario }
+                        <span *ngIf="isSaving" class="btn-spinner"></span>
+                        {{ isSaving ? 'Guardando...' : 'Registrar Usuario' }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
-    }
 
-    @if (showDeleteModal) {
-    <div class="modal-backdrop" (click)="closeDeleteModal()">
+    <!-- MODAL EDITAR -->
+    <div *ngIf="showEditModal && usuarioEditar" class="modal-backdrop" (click)="closeEditModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2>Editar Usuario</h2>
+                <button class="btn-close" (click)="closeEditModal()">&times;</button>
+            </header>
+
+            <form (ngSubmit)="actualizarUsuario()" class="modal-form">
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" name="editUsername" [(ngModel)]="usuarioEditar.username" required>
+                </div>
+                <div class="form-group">
+                    <label>Rol</label>
+                    <select name="editRol" [(ngModel)]="usuarioEditar.rolId" required>
+                        <option [ngValue]="1">Administrador</option>
+                        <option [ngValue]="3">Médico</option>
+                        <option [ngValue]="2">Paciente</option>
+                    </select>
+                </div>
+
+                <!-- MENSAJE DE ÉXITO -->
+                <div *ngIf="editSuccessMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i> {{ editSuccessMessage }}
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                        <span *ngIf="isSaving" class="btn-spinner"></span>
+                        {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR -->
+    <div *ngIf="showDeleteModal" class="modal-backdrop" (click)="closeDeleteModal()">
         <div class="premium-modal" (click)="$event.stopPropagation()">
             <div class="delete-modal-content">
-                <div class="delete-icon-box">
-                    <i class="fas fa-trash-alt"></i>
-                </div>
                 <h3>¿Confirmar Eliminación?</h3>
-                <p>Esta acción no se puede deshacer. El usuario será eliminado permanentemente del sistema.</p>
+                <p>Esta acción no se puede deshacer.</p>
                 <div class="modal-actions">
                     <button class="btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
-                    <button class="btn-primary" style="background: #ef4444;" (click)="confirmDelete()">Eliminar
-                        Usuario</button>
+                    <button class="btn-primary btn-danger" (click)="confirmDelete()">Eliminar Usuario</button>
                 </div>
             </div>
         </div>
     </div>
-    }
+
 </div>

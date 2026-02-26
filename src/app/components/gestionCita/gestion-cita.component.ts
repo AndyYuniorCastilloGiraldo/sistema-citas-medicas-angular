@@ -1,0 +1,262 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CitaResponse, CitaRequest } from '../../models/cita.models';
+import { CitaService } from '../../services/cita.service';
+import { PacienteResponse } from '../../models/paciente.models';
+import { PacienteService } from '../../services/paciente.service';
+import { MedicoResponse } from '../../models/medico.models';
+import { MedicoService } from '../../services/medico.service';
+import { AuthService } from '../../services/auth.service';
+import { UsuarioService } from '../../services/usuario.service';
+
+@Component({
+    selector: 'app-gestion-cita',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './gestion-cita.component.html',
+    styleUrls: ['./gestion-cita.component.css']
+})
+export class GestionCitaComponent implements OnInit {
+
+    private citaService = inject(CitaService);
+    private pacienteService = inject(PacienteService);
+    private medicoService = inject(MedicoService);
+    private usuarioService = inject(UsuarioService);
+    private authService = inject(AuthService);
+    private router = inject(Router);
+
+    citas: CitaResponse[] = [];
+    filteredCitas: CitaResponse[] = [];
+    pacientes: PacienteResponse[] = [];
+    medicos: MedicoResponse[] = [];
+
+    currentUserId: number | null = null;
+    currentPatientId: number | null = null;
+    isPatient: boolean = false;
+    userName: string = '';
+    patientName: string = '';
+    searchTerm: string = '';
+
+    isLoading: boolean = false;
+    isSaving: boolean = false;
+    errorMessage: string = '';
+
+    successMessage: string = '';
+    editSuccessMessage: string = '';
+
+    showModal: boolean = false;
+    showEditModal: boolean = false;
+    showDeleteModal: boolean = false;
+
+    idToDelete: number | null = null;
+
+    nuevaCita: CitaRequest = {
+        fecha: '',
+        hora: '',
+        motivo: '',
+        observaciones: '',
+        idPaciente: 0,
+        idMedico: 0,
+        idUsuario: 0
+    };
+
+    citaEditar: CitaResponse | null = null;
+
+    ngOnInit(): void {
+        this.cargarDatos();
+        this.obtenerUsuarioActual();
+    }
+
+    // =========================
+    // CARGAR DATOS
+    // =========================
+
+    cargarDatos(): void {
+        this.isLoading = true;
+        this.errorMessage = '';
+
+        // Cargar Citas
+        this.citaService.listar().subscribe({
+            next: (data) => {
+                this.citas = data;
+                this.applyFilter();
+                this.isLoading = false;
+            },
+            error: () => {
+                this.errorMessage = 'Error al cargar citas.';
+                this.isLoading = false;
+            }
+        });
+
+        // Cargar Pacientes y Médicos para los selects
+        this.pacienteService.listar().subscribe(data => this.pacientes = data);
+        this.medicoService.listar().subscribe(data => this.medicos = data);
+    }
+
+    obtenerUsuarioActual(): void {
+        const username = this.authService.getUsername();
+        const role = this.authService.getRole();
+        this.isPatient = role === 'USUARIO';
+
+        if (username) {
+            this.userName = username;
+            this.usuarioService.listar().subscribe(usuarios => {
+                const user = usuarios.find(u => u.username === username);
+                if (user) {
+                    this.currentUserId = user.idUsuario;
+                    this.nuevaCita.idUsuario = user.idUsuario;
+
+                    if (this.isPatient) {
+                        this.pacienteService.listar().subscribe(pacientes => {
+                            const found = pacientes.find(p =>
+                                p.nombres.toLowerCase().includes(username.toLowerCase()) ||
+                                p.apellidos.toLowerCase().includes(username.toLowerCase())
+                            );
+                            if (found) {
+                                this.currentPatientId = found.idPaciente;
+                                this.patientName = `${found.nombres} ${found.apellidos}`;
+                                this.applyFilter();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    applyFilter(): void {
+        const term = this.searchTerm.toLowerCase();
+
+        this.filteredCitas = this.citas.filter(c => {
+            const matchesRole = !this.isPatient || (this.currentPatientId !== null && c.idPaciente === this.currentPatientId);
+            const matchesTerm = c.nombrePaciente.toLowerCase().includes(term) ||
+                c.nombreMedico.toLowerCase().includes(term) ||
+                c.motivo.toLowerCase().includes(term) ||
+                c.estado.toLowerCase().includes(term);
+
+            return matchesRole && matchesTerm;
+        });
+    }
+
+    // =========================
+    // REGISTRAR
+    // =========================
+
+    openModal(): void {
+        this.showModal = true;
+        this.successMessage = '';
+        this.nuevaCita = {
+            fecha: '',
+            hora: '',
+            motivo: '',
+            observaciones: '',
+            idPaciente: this.currentPatientId || 0,
+            idMedico: 0,
+            idUsuario: this.currentUserId || 0
+        };
+    }
+
+    closeModal(): void {
+        this.showModal = false;
+        this.successMessage = '';
+    }
+
+    registrarCita(): void {
+        if (!this.nuevaCita.fecha || !this.nuevaCita.hora || !this.nuevaCita.idPaciente || !this.nuevaCita.idMedico) {
+            alert('Complete los campos obligatorios');
+            return;
+        }
+
+        this.isSaving = true;
+        this.successMessage = '';
+
+        this.citaService.crear(this.nuevaCita)
+            .subscribe({
+                next: () => {
+                    this.isSaving = false;
+                    this.successMessage = 'Cita registrada correctamente';
+                    this.cargarDatos();
+                    this.nuevaCita = { fecha: '', hora: '', motivo: '', observaciones: '', idPaciente: 0, idMedico: 0, idUsuario: this.currentUserId || 0 };
+                    setTimeout(() => this.successMessage = '', 3000);
+                },
+                error: () => {
+                    this.isSaving = false;
+                    alert('Error al registrar cita. Verifique la disponibilidad.');
+                }
+            });
+    }
+
+    // =========================
+    // EDITAR / CANCELAR
+    // =========================
+
+    openEditModal(cita: CitaResponse): void {
+        this.citaEditar = { ...cita };
+        this.editSuccessMessage = '';
+        this.showEditModal = true;
+    }
+
+    closeEditModal(): void {
+        this.showEditModal = false;
+        this.citaEditar = null;
+        this.editSuccessMessage = '';
+    }
+
+    actualizarCita(): void {
+        if (!this.citaEditar) return;
+
+        const request: CitaRequest = {
+            fecha: this.citaEditar.fecha,
+            hora: this.citaEditar.hora,
+            motivo: this.citaEditar.motivo,
+            observaciones: this.citaEditar.observaciones,
+            idPaciente: this.citaEditar.idPaciente,
+            idMedico: this.citaEditar.idMedico,
+            idUsuario: this.citaEditar.idUsuario
+        };
+
+        this.isSaving = true;
+        this.editSuccessMessage = '';
+
+        this.citaService.actualizar(this.citaEditar.idCita, request)
+            .subscribe({
+                next: () => {
+                    this.isSaving = false;
+                    this.editSuccessMessage = 'Cita actualizada correctamente';
+                    this.cargarDatos();
+                    setTimeout(() => this.editSuccessMessage = '', 3000);
+                },
+                error: () => {
+                    this.isSaving = false;
+                    alert('Error al actualizar cita');
+                }
+            });
+    }
+
+    cancelarCita(id: number): void {
+        if (confirm('¿Desea cancelar esta cita?')) {
+            this.citaService.cancelar(id).subscribe({
+                next: () => this.cargarDatos(),
+                error: () => alert('No se pudo cancelar la cita')
+            });
+        }
+    }
+
+    // =========================
+    // AUXILIARES
+    // =========================
+
+    getStatusClass(estado: string): string {
+        const e = estado.toLowerCase();
+        if (e.includes('pendiente')) return 'status-pending';
+        if (e.includes('completada') || e.includes('asistio')) return 'status-completed';
+        if (e.includes('cancelada')) return 'status-cancelled';
+        return '';
+    }
+
+    volverAlDashboard(): void {
+        this.router.navigate(['/']);
+    }
+}

@@ -4,47 +4,75 @@
         <p>Visión global del sistema médico</p>
     </header>
 
-    <div class="stats-grid">
+    <div class="stats-grid dashboard-3-cols">
         <div class="stat-card blue">
-            <div class="icon-box"><i class="fas fa-users"></i></div>
+            <div class="icon-box"><i class="fas fa-users-cog"></i></div>
             <div class="stat-info">
-                <span class="value">124</span>
+                <span class="value">{{ totalUsuarios }}</span>
                 <span class="label">Usuarios Totales</span>
             </div>
         </div>
-        <div class="stat-card green">
-            <div class="icon-box"><i class="fas fa-user-md"></i></div>
+        <div class="stat-card patient">
+            <div class="icon-box"><i class="fas fa-procedures"></i></div>
             <div class="stat-info">
-                <span class="value">45</span>
-                <span class="label">Médicos Activos</span>
+                <span class="value">{{ totalPacientes }}</span>
+                <span class="label">Pacientes Registrados</span>
             </div>
         </div>
-        <div class="stat-card purple">
+        <div class="stat-card orange">
             <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
             <div class="stat-info">
-                <span class="value">892</span>
-                <span class="label">Citas del Mes</span>
+                <span class="value">{{ totalCitas }}</span>
+                <span class="label">Citas Totales</span>
             </div>
         </div>
     </div>
 
-    <div class="recent-activity">
-        <h3>Actividad Reciente</h3>
-        <div class="activity-list">
-            <div class="activity-item">
-                <div class="icon-circle blue-icon"><i class="fas fa-user-plus"></i></div>
-                <div class="info">
-                    <span class="text">Nuevo médico registrado: <strong>Dr. Carlos Ruiz</strong></span>
-                    <span class="time">Hace 2 horas</span>
-                </div>
-            </div>
-            <div class="activity-item">
-                <div class="icon-circle green-icon"><i class="fas fa-check"></i></div>
-                <div class="info">
-                    <span class="text">Sistema actualizado a la versión <strong>2.1.0</strong></span>
-                    <span class="time">Hace 5 horas</span>
-                </div>
-            </div>
+    <!-- APPOINTMENT LIST SECTION -->
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h3><i class="fas fa-clipboard-list"></i> Monitor de Citas Recientes</h3>
+            <p>Seguimiento en tiempo real de la agenda médica global</p>
+        </div>
+
+        <div class="table-container">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Fecha y Hora</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cita of citasRecientes">
+                        <td>
+                            <div class="user-id-cell">
+                                <div class="avatar-sm"><i class="fas fa-user-injured"></i></div>
+                                <span>{{ cita.nombrePaciente }}</span>
+                            </div>
+                        </td>
+                        <td>Dr. {{ cita.nombreMedico }}</td>
+                        <td>
+                            <div class="datetime-compact">
+                                <span class="d">{{ cita.fecha | date:'dd/MM/yyyy' }}</span>
+                                <span class="t">{{ cita.hora }}</span>
+                            </div>
+                        </td>
+                        <td class="motivo-cell">{{ cita.motivo }}</td>
+                        <td>
+                            <span class="status-indicator" [ngClass]="getStatusClass(cita.estado)">
+                                {{ cita.estado }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="citasRecientes.length === 0 && !isLoading">
+                        <td colspan="5" class="empty-msg">No se encontraron citas en el sistema.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

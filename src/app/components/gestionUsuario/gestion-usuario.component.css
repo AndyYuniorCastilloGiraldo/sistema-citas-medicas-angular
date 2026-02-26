@@ -16,6 +16,7 @@
     }
 }
 
+/* ===================== HEADER ===================== */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -82,6 +83,7 @@
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
+/* ===================== CONTROLES ===================== */
 .controls-card {
     background: white;
     padding: 20px;
@@ -113,6 +115,7 @@
     font-family: inherit;
     font-size: 14px;
     transition: all 0.3s;
+    box-sizing: border-box;
 }
 
 .search-box input:focus {
@@ -132,6 +135,7 @@
     cursor: pointer;
 }
 
+/* ===================== TABLA ===================== */
 .table-card {
     background: white;
     border-radius: 20px;
@@ -228,7 +232,7 @@
     font-size: 13px;
 }
 
-/* Switch Toggle */
+/* Switch */
 .switch {
     position: relative;
     display: inline-block;
@@ -284,6 +288,7 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
+/* Botones acción */
 .action-buttons {
     display: flex;
     gap: 8px;
@@ -326,6 +331,7 @@ input:checked+.slider:before {
     font-style: italic;
 }
 
+/* Estados carga/error */
 .loader-state,
 .error-state {
     padding: 60px;
@@ -369,7 +375,7 @@ input:checked+.slider:before {
     cursor: pointer;
 }
 
-/* Modal Styles */
+/* ===================== MODALES ===================== */
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -430,9 +436,6 @@ input:checked+.slider:before {
     font-size: 1.25rem;
     color: #1e293b;
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
 }
 
 .btn-close {
@@ -470,6 +473,7 @@ input:checked+.slider:before {
     font-family: inherit;
     font-size: 15px;
     transition: all 0.2s;
+    box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -493,7 +497,13 @@ input:checked+.slider:before {
     background: #f8fafc;
     color: #64748b;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
 }
 
 .btn-primary {
@@ -504,17 +514,79 @@ input:checked+.slider:before {
     background: #2563eb;
     color: white;
     font-weight: 700;
+    font-family: inherit;
+    font-size: 14px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: background 0.2s;
 }
 
+.btn-primary:v-hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.btn-primary:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+/* Spinner dentro del botón */
 .btn-spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.35);
     border-top-color: white;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+/* Mensaje éxito modal — justo encima de los botones */
+.success-message {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeSuccess 0.35s ease;
+    border: 1px solid #a7f3d0;
+}
+
+.success-message i {
+    color: #10b981;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+@keyframes fadeSuccess {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal eliminar */
+.delete-modal-content {
+    padding: 35px 30px;
+    text-align: center;
+}
+
+.delete-modal-content h3 {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin: 0 0 10px;
+}
+
+.delete-modal-content p {
+    color: #64748b;
+    margin-bottom: 25px;
 }

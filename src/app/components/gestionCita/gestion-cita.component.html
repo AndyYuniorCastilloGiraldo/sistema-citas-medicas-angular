@@ -1,0 +1,233 @@
+<div class="management-container">
+
+    <!-- HEADER -->
+    <header class="page-header">
+        <div class="header-info">
+            <div class="header-top">
+                <button class="btn-back" (click)="volverAlDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>{{ isPatient ? 'Mis Citas Médicas' : 'Gestión de Citas Médicas' }}</h1>
+            </div>
+            <p>{{ isPatient ? 'Haga clic en Nueva Cita para reservar un turno con nuestros especialistas.' : 'Programe,
+                realice seguimiento y gestione el estado de las citas en el sistema.' }}</p>
+        </div>
+
+        <button class="btn-add" (click)="openModal()">
+            <i class="fas fa-calendar-plus"></i>
+            Nueva Cita
+        </button>
+    </header>
+
+    <!-- CONTROLES -->
+    <div class="controls-card">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar por paciente, médico, motivo o estado..." [(ngModel)]="searchTerm"
+                (input)="applyFilter()">
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-card">
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loader-state">
+            <div class="spinner"></div>
+            <p>Sincronizando agenda...</p>
+        </div>
+
+        <!-- ERROR -->
+        <div *ngIf="errorMessage && !isLoading" class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ errorMessage }}</p>
+            <button (click)="cargarDatos()" class="btn-retry">Reintentar</button>
+        </div>
+
+        <!-- TABLA -->
+        <div *ngIf="!isLoading && !errorMessage" class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Fecha / Hora</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cita of filteredCitas">
+                        <td class="id-col">#{{ cita.idCita }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-sm"><i class="fas fa-user-injured"></i></div>
+                                <span>{{ cita.nombrePaciente }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-sm medico-avatar"><i class="fas fa-user-md"></i></div>
+                                <span>{{ cita.nombreMedico }}</span>
+                            </div>
+                        </td>
+                        <td class="datetime-col">
+                            <div class="date-chip"><i class="far fa-calendar-alt"></i> {{ cita.fecha }}</div>
+                            <div class="time-chip"><i class="far fa-clock"></i> {{ cita.hora }}</div>
+                        </td>
+                        <td>
+                            <div class="motivo-text" [title]="cita.motivo">{{ cita.motivo }}</div>
+                        </td>
+                        <td>
+                            <span class="status-badge" [ngClass]="getStatusClass(cita.estado)">
+                                {{ cita.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon edit" (click)="openEditModal(cita)" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button *ngIf="cita.estado !== 'CANCELADA'" class="btn-icon delete"
+                                    (click)="cancelarCita(cita.idCita)" title="Cancelar Cita">
+                                    <i class="fas fa-calendar-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="filteredCitas.length === 0">
+                        <td colspan="7" class="empty-row">No se encontraron citas programadas.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR -->
+    <div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2>Programar Nueva Cita</h2>
+                <button class="btn-close" (click)="closeModal()">&times;</button>
+            </header>
+
+            <form (ngSubmit)="registrarCita()" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group full-width" *ngIf="!isPatient">
+                        <label>Paciente</label>
+                        <select name="idPaciente" [(ngModel)]="nuevaCita.idPaciente" required>
+                            <option [ngValue]="0" disabled>Seleccione Paciente</option>
+                            <option *ngFor="let p of pacientes" [ngValue]="p.idPaciente">
+                                {{ p.nombres }} {{ p.apellidos }} (DNI: {{ p.dni }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width" *ngIf="isPatient">
+                        <label>Reserva para:</label>
+                        <div class="read-only-field">
+                            <i class="fas fa-user"></i> {{ patientName }}
+                        </div>
+                        <input type="hidden" name="idPaciente" [(ngModel)]="nuevaCita.idPaciente">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Médico / Especialista</label>
+                        <select name="idMedico" [(ngModel)]="nuevaCita.idMedico" required>
+                            <option [ngValue]="0" disabled>Seleccione Médico</option>
+                            <option *ngFor="let m of medicos" [ngValue]="m.idMedico">
+                                Dr. {{ m.nombres }} {{ m.apellidos }} ({{ m.nombreEspecialidad }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" name="fecha" [(ngModel)]="nuevaCita.fecha" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hora</label>
+                        <input type="time" name="hora" [(ngModel)]="nuevaCita.hora" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Motivo de Consulta</label>
+                        <input type="text" name="motivo" [(ngModel)]="nuevaCita.motivo"
+                            placeholder="Ej: Dolor abdominal, Control mensual..." required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Observaciones Adicionales</label>
+                        <textarea name="observaciones" [(ngModel)]="nuevaCita.observaciones" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- MENSAJE DE ÉXITO -->
+                <div *ngIf="successMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i> {{ successMessage }}
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                        <span *ngIf="isSaving" class="btn-spinner"></span>
+                        {{ isSaving ? 'Agendando...' : 'Programar Cita' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR -->
+    <div *ngIf="showEditModal && citaEditar" class="modal-backdrop" (click)="closeEditModal()">
+        <div class="premium-modal" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h2>Reprogramar Cita</h2>
+                <button class="btn-close" (click)="closeEditModal()">&times;</button>
+            </header>
+
+            <form (ngSubmit)="actualizarCita()" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nueva Fecha</label>
+                        <input type="date" name="editFecha" [(ngModel)]="citaEditar.fecha" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nueva Hora</label>
+                        <input type="time" name="editHora" [(ngModel)]="citaEditar.hora" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Motivo</label>
+                        <input type="text" name="editMotivo" [(ngModel)]="citaEditar.motivo" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Observaciones</label>
+                        <textarea name="editObservaciones" [(ngModel)]="citaEditar.observaciones" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- MENSAJE DE ÉXITO -->
+                <div *ngIf="editSuccessMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i> {{ editSuccessMessage }}
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                        <span *ngIf="isSaving" class="btn-spinner"></span>
+                        {{ isSaving ? 'Actualizando...' : 'Guardar Cambios' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

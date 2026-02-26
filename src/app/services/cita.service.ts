@@ -8,29 +8,29 @@ import { CitaRequest, CitaResponse } from '../models/cita.models';
 })
 export class CitaService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/api/cita';
+    private apiUrl = 'http://localhost:8080/api/citas';
 
     listar(): Observable<CitaResponse[]> {
-        return this.http.get<CitaResponse[]>(this.apiUrl);
+        return this.http.get<CitaResponse[]>(`${this.apiUrl}/listar`);
     }
 
     obtenerPorId(id: number): Observable<CitaResponse> {
-        return this.http.get<CitaResponse>(`${this.apiUrl}/${id}`);
+        return this.http.get<CitaResponse>(`${this.apiUrl}/obtener/${id}`);
     }
 
     crear(request: CitaRequest): Observable<CitaResponse> {
-        return this.http.post<CitaResponse>(this.apiUrl, request);
+        return this.http.post<CitaResponse>(`${this.apiUrl}/registrar`, request);
     }
 
     actualizar(id: number, request: CitaRequest): Observable<CitaResponse> {
-        return this.http.put<CitaResponse>(`${this.apiUrl}/${id}`, request);
+        return this.http.put<CitaResponse>(`${this.apiUrl}/actualizar/${id}`, request);
     }
 
     cancelar(id: number): Observable<void> {
-        return this.http.patch<void>(`${this.apiUrl}/${id}/cancelar`, {});
+        return this.http.patch<void>(`${this.apiUrl}/cancelar/${id}`, {});
     }
 
     eliminar(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+        return this.http.delete<void>(`${this.apiUrl}/eliminar/${id}`);
     }
 }
