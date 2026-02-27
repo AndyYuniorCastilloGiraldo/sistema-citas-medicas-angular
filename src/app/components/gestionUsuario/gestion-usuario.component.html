@@ -31,7 +31,7 @@
                 <option value="">Todos los Roles</option>
                 <option value="admin">Administrador</option>
                 <option value="medico">Médico</option>
-                <option value="usuario">Paciente</option>
+                <option value="usuario">Paciente (Usuario)</option>
             </select>
         </div>
     </div>
@@ -58,7 +58,9 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Usuario</th>
+                        <th>Nombres y Apellidos</th>
+                        <th>Correo Electrónico</th>
+                        <th>Contraseña</th>
                         <th>Rol</th>
                         <th>Fecha Registro</th>
                         <th>Estado</th>
@@ -70,9 +72,16 @@
                         <td class="id-col">#{{ usuario.idUsuario }}</td>
                         <td>
                             <div class="user-cell">
-                                <div class="avatar-sm">{{ usuario.username.charAt(0).toUpperCase() }}</div>
-                                <span>{{ usuario.username }}</span>
+                                <div class="avatar-sm">{{ getNombreReal(usuario.username).charAt(0).toUpperCase() }}
+                                </div>
+                                <span class="real-name">{{ getNombreReal(usuario.username) }}</span>
                             </div>
+                        </td>
+                        <td>
+                            <span class="username-email">{{ usuario.username }}</span>
+                        </td>
+                        <td>
+                            <code class="password-text">{{ usuario.password || '********' }}</code>
                         </td>
                         <td>
                             <span class="role-badge">{{ usuario.rolNombre.replace('ROLE_', '') }}</span>
@@ -164,8 +173,8 @@
                     <label>Rol</label>
                     <select name="editRol" [(ngModel)]="usuarioEditar.rolId" required>
                         <option [ngValue]="1">Administrador</option>
-                        <option [ngValue]="3">Médico</option>
-                        <option [ngValue]="2">Paciente</option>
+                        <option [ngValue]="2">Usuario</option>
+                        <option [ngValue]="3">Medico</option>
                     </select>
                 </div>
 

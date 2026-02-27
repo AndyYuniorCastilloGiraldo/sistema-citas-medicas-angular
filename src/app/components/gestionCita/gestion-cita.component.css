@@ -21,6 +21,24 @@
     color: #2563eb;
 }
 
+.patient-pill {
+    background: #f0f7ff;
+    border: 1.5px solid #bfdbfe;
+    padding: 10px 16px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.patient-pill i {
+    font-size: 18px;
+    color: #3b82f6;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -296,6 +314,12 @@
     border-color: #ef4444;
     color: #ef4444;
     background: #fee2e2;
+}
+
+.btn-icon.check:hover {
+    border-color: #10b981;
+    color: #10b981;
+    background: #ecfdf5;
 }
 
 /* ===================== MODALES ===================== */

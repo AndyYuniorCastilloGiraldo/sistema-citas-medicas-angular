@@ -44,10 +44,9 @@ export class PatientDashboardComponent implements OnInit {
                 // Por ahora, buscaremos un paciente cuyos nombres coincidan con el username para demostración
                 // o simplemente tomaremos el primer paciente si es un entorno de prueba.
                 this.pacienteService.listar().subscribe(pacientes => {
-                    // Intento de vinculación lógica:
+                    // Buscar paciente por correo que coincida con el username (robusto)
                     const found = pacientes.find(p =>
-                        p.nombres.toLowerCase().includes(username.toLowerCase()) ||
-                        p.apellidos.toLowerCase().includes(username.toLowerCase())
+                        p.correo?.toLowerCase().trim() === username.toLowerCase().trim()
                     );
 
                     if (found) {

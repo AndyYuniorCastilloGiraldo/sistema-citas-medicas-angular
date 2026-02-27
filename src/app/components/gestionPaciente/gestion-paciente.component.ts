@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PacienteResponse, PacienteRequest } from '../../models/paciente.models';
 import { PacienteService } from '../../services/paciente.service';
+import { UsuarioService } from '../../services/usuario.service';
+import { UsuarioRequest } from '../../models/usuario.models';
 
 @Component({
     selector: 'app-gestion-paciente',
@@ -15,23 +17,23 @@ import { PacienteService } from '../../services/paciente.service';
 export class GestionPacienteComponent implements OnInit {
 
     private pacienteService = inject(PacienteService);
+    private usuarioService = inject(UsuarioService);
     private router = inject(Router);
 
     pacientes: PacienteResponse[] = [];
     filteredPacientes: PacienteResponse[] = [];
-
     searchTerm: string = '';
 
-    isLoading: boolean = false;
-    isSaving: boolean = false;
-    errorMessage: string = '';
+    isLoading = false;
+    isSaving = false;
 
-    successMessage: string = '';
-    editSuccessMessage: string = '';
+    errorMessage = '';
+    successMessage = '';
+    editSuccessMessage = '';
 
-    showModal: boolean = false;
-    showEditModal: boolean = false;
-    showDeleteModal: boolean = false;
+    showModal = false;
+    showEditModal = false;
+    showDeleteModal = false;
 
     idToDelete: number | null = null;
 
@@ -45,47 +47,43 @@ export class GestionPacienteComponent implements OnInit {
     };
 
     pacienteEditar: PacienteResponse | null = null;
+    passwordPaciente = '';
 
     ngOnInit(): void {
         this.cargarPacientes();
     }
 
     // =========================
-    // CARGAR PACIENTES
+    // LISTAR
     // =========================
-
     cargarPacientes(): void {
         this.isLoading = true;
-        this.errorMessage = '';
 
-        this.pacienteService.listar()
-            .subscribe({
-                next: (data) => {
-                    this.pacientes = data;
-                    this.applyFilter();
-                    this.isLoading = false;
-                },
-                error: () => {
-                    this.errorMessage = 'Error al cargar pacientes.';
-                    this.isLoading = false;
-                }
-            });
+        this.pacienteService.listar().subscribe({
+            next: (data) => {
+                this.pacientes = data;
+                this.applyFilter();
+                this.isLoading = false;
+            },
+            error: () => {
+                this.errorMessage = 'Error al cargar pacientes';
+                this.isLoading = false;
+            }
+        });
     }
 
     applyFilter(): void {
         const term = this.searchTerm.toLowerCase();
-
-        this.filteredPacientes = this.pacientes.filter(p => {
-            return p.nombres.toLowerCase().includes(term) ||
-                p.apellidos.toLowerCase().includes(term) ||
-                p.dni.toLowerCase().includes(term);
-        });
+        this.filteredPacientes = this.pacientes.filter(p =>
+            p.nombres.toLowerCase().includes(term) ||
+            p.apellidos.toLowerCase().includes(term) ||
+            p.dni.toLowerCase().includes(term)
+        );
     }
 
     // =========================
     // REGISTRAR
     // =========================
-
     openModal(): void {
         this.showModal = true;
         this.successMessage = '';
@@ -97,80 +95,114 @@ export class GestionPacienteComponent implements OnInit {
             correo: '',
             direccion: ''
         };
+        this.passwordPaciente = '';
     }
 
     closeModal(): void {
         this.showModal = false;
-        this.successMessage = '';
     }
 
     registrarPaciente(): void {
-        if (!this.nuevoPaciente.nombres || !this.nuevoPaciente.apellidos || !this.nuevoPaciente.dni) {
-            alert('Complete los campos obligatorios (Nombres, Apellidos, DNI)');
+
+        // 🔥 NORMALIZAR CORREO (CLAVE DEL PROBLEMA)
+        this.nuevoPaciente.correo = this.nuevoPaciente.correo
+            .trim()
+            .toLowerCase();
+
+        if (!this.nuevoPaciente.correo.includes('@')) {
+            alert('Correo inválido');
+            return;
+        }
+
+        if (!this.nuevoPaciente.nombres || !this.nuevoPaciente.apellidos ||
+            !this.nuevoPaciente.dni || !this.nuevoPaciente.correo) {
+            alert('Complete los campos obligatorios');
+            return;
+        }
+
+        if (this.passwordPaciente && this.passwordPaciente.includes(' ')) {
+            alert('La contraseña no debe tener espacios');
             return;
         }
 
         this.isSaving = true;
-        this.successMessage = '';
 
-        this.pacienteService.crear(this.nuevoPaciente)
-            .subscribe({
-                next: () => {
-                    this.isSaving = false;
-                    this.successMessage = 'Paciente registrado correctamente';
-                    this.cargarPacientes();
-                    this.nuevoPaciente = { nombres: '', apellidos: '', dni: '', telefono: '', correo: '', direccion: '' };
-                    setTimeout(() => this.successMessage = '', 3000);
-                },
-                error: () => {
-                    this.isSaving = false;
-                    alert('Error al registrar paciente');
-                }
-            });
+        // 1️⃣ CREAR PACIENTE
+        this.pacienteService.crear(this.nuevoPaciente).subscribe({
+            next: () => {
+
+                // 2️⃣ CREAR USUARIO (MISMO CORREO = USERNAME)
+                const usuarioReq: UsuarioRequest = {
+                    username: this.nuevoPaciente.correo,
+                    password: this.passwordPaciente?.trim() || 'Paciente123*',
+                    rolId: 2
+                };
+
+                this.usuarioService.crear(usuarioReq).subscribe({
+                    next: () => {
+                        this.isSaving = false;
+                        this.successMessage =
+                            `Paciente y usuario creados correctamente.
+Usuario: ${usuarioReq.username}
+Password: ${usuarioReq.password}`;
+
+                        this.cargarPacientes();
+                        this.closeModal();
+
+                        setTimeout(() => this.successMessage = '', 8000);
+                    },
+                    error: () => {
+                        this.isSaving = false;
+                        this.errorMessage =
+                            'Paciente creado, pero error al crear usuario';
+                    }
+                });
+            },
+            error: () => {
+                this.isSaving = false;
+                alert('Error al registrar paciente');
+            }
+        });
     }
 
     // =========================
     // EDITAR
     // =========================
-
     openEditModal(paciente: PacienteResponse): void {
         this.pacienteEditar = { ...paciente };
-        this.editSuccessMessage = '';
         this.showEditModal = true;
     }
 
     closeEditModal(): void {
         this.showEditModal = false;
         this.pacienteEditar = null;
-        this.editSuccessMessage = '';
     }
 
     actualizarPaciente(): void {
         if (!this.pacienteEditar) return;
 
-        const request: PacienteRequest = {
+        const req: PacienteRequest = {
             nombres: this.pacienteEditar.nombres,
             apellidos: this.pacienteEditar.apellidos,
             dni: this.pacienteEditar.dni,
             telefono: this.pacienteEditar.telefono,
-            correo: this.pacienteEditar.correo,
+            correo: this.pacienteEditar.correo.trim().toLowerCase(),
             direccion: this.pacienteEditar.direccion
         };
 
         this.isSaving = true;
-        this.editSuccessMessage = '';
 
-        this.pacienteService.actualizar(this.pacienteEditar.idPaciente, request)
+        this.pacienteService.actualizar(this.pacienteEditar.idPaciente, req)
             .subscribe({
                 next: () => {
                     this.isSaving = false;
-                    this.editSuccessMessage = 'Paciente actualizado correctamente';
+                    this.editSuccessMessage = 'Paciente actualizado';
                     this.cargarPacientes();
                     setTimeout(() => this.editSuccessMessage = '', 3000);
                 },
                 error: () => {
                     this.isSaving = false;
-                    alert('Error al actualizar paciente');
+                    alert('Error al actualizar');
                 }
             });
     }
@@ -178,7 +210,6 @@ export class GestionPacienteComponent implements OnInit {
     // =========================
     // ELIMINAR
     // =========================
-
     deletePaciente(id: number): void {
         this.idToDelete = id;
         this.showDeleteModal = true;
@@ -190,19 +221,18 @@ export class GestionPacienteComponent implements OnInit {
     }
 
     confirmDelete(): void {
-        if (this.idToDelete === null) return;
+        if (!this.idToDelete) return;
 
-        this.pacienteService.eliminar(this.idToDelete)
-            .subscribe({
-                next: () => {
-                    this.cargarPacientes();
-                    this.closeDeleteModal();
-                },
-                error: () => {
-                    alert('No se pudo eliminar el paciente');
-                    this.closeDeleteModal();
-                }
-            });
+        this.pacienteService.eliminar(this.idToDelete).subscribe({
+            next: () => {
+                this.cargarPacientes();
+                this.closeDeleteModal();
+            },
+            error: () => {
+                alert('No se pudo eliminar');
+                this.closeDeleteModal();
+            }
+        });
     }
 
     volverAlDashboard(): void {

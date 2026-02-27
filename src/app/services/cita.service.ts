@@ -30,6 +30,10 @@ export class CitaService {
         return this.http.patch<void>(`${this.apiUrl}/cancelar/${id}`, {});
     }
 
+    atender(id: number): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/atender/${id}`, {});
+    }
+
     eliminar(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/eliminar/${id}`);
     }

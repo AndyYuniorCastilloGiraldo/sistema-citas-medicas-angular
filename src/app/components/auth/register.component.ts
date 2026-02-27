@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { RegisterRequest } from '../../models/auth.models';
+import { PacienteService } from '../../services/paciente.service';
+import { PacienteRequest } from '../../models/paciente.models';
 
 @Component({
     selector: 'app-register',
@@ -14,6 +16,7 @@ import { RegisterRequest } from '../../models/auth.models';
 })
 export class RegisterComponent {
     private authService = inject(AuthService);
+    private pacienteService = inject(PacienteService);
     private router = inject(Router);
 
     registerData: RegisterRequest = {
@@ -22,30 +25,65 @@ export class RegisterComponent {
         rolId: 2 // Por defecto rol de usuario
     };
 
+    pacienteData: PacienteRequest = {
+        nombres: '',
+        apellidos: '',
+        dni: '',
+        telefono: '',
+        correo: '',
+        direccion: ''
+    };
+
     successMessage: string = '';
     errorMessage: string = '';
     isLoading: boolean = false;
 
     onSubmit(): void {
-        if (this.registerData.username && this.registerData.password) {
-            this.isLoading = true;
-            this.errorMessage = '';
-            this.successMessage = '';
 
-            this.authService.register(this.registerData).subscribe({
-                next: (response) => {
-                    this.isLoading = false;
-                    this.successMessage = 'Usuario registrado correctamente. Redirigiendo al login...';
-                    setTimeout(() => {
-                        this.router.navigate(['/login']);
-                    }, 2000);
+    this.registerData.username = this.registerData.username.trim().toLowerCase();
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    // 1️⃣ REGISTRAR USUARIO
+    this.authService.register(this.registerData).subscribe({
+        next: () => {
+
+            // 2️⃣ LOGIN AUTOMÁTICO
+            this.authService.login({
+                username: this.registerData.username,
+                password: this.registerData.password
+            }).subscribe({
+                next: () => {
+
+                    // 3️⃣ YA HAY TOKEN → CREAR PACIENTE
+                    this.pacienteData.correo = this.registerData.username;
+
+                    this.pacienteService.crear(this.pacienteData).subscribe({
+                        next: () => {
+                            this.isLoading = false;
+                            this.router.navigate(['/login']);
+                        },
+                        error: (err) => {
+                            this.isLoading = false;
+                            this.errorMessage = 'Usuario creado pero error al crear paciente';
+                            console.error(err);
+                        }
+                    });
+
                 },
-                error: (err) => {
+                error: () => {
                     this.isLoading = false;
-                    this.errorMessage = 'Error al registrar el usuario. Por favor intente de nuevo.';
-                    console.error('Register error:', err);
+                    this.errorMessage = 'Error al iniciar sesión automática';
                 }
             });
+
+        },
+        error: () => {
+            this.isLoading = false;
+            this.errorMessage = 'Error al registrar usuario';
         }
-    }
+    });
+}
+    
 }

@@ -73,7 +73,7 @@
             </li>
             }
 
-            @if (role === 'USUARIO') {
+            @if (role === 'USUARIO' || role === 'PACIENTE') {
             <li routerLinkActive="active">
                 <a routerLink="/citas">
                     <i class="fas fa-calendar-plus"></i>
@@ -81,7 +81,7 @@
                 </a>
             </li>
             <li routerLinkActive="active">
-                <a routerLink="/citas">
+                <a routerLink="/mis-citas">
                     <i class="fas fa-clipboard-list"></i>
                     <span>Mis Citas</span>
                 </a>

@@ -34,7 +34,9 @@ export class GestionCitaComponent implements OnInit {
 
     currentUserId: number | null = null;
     currentPatientId: number | null = null;
+    currentMedicoId: number | null = null;
     isPatient: boolean = false;
+    isMedico: boolean = false;
     userName: string = '';
     patientName: string = '';
     searchTerm: string = '';
@@ -98,7 +100,9 @@ export class GestionCitaComponent implements OnInit {
     obtenerUsuarioActual(): void {
         const username = this.authService.getUsername();
         const role = this.authService.getRole();
-        this.isPatient = role === 'USUARIO';
+        // Aceptar tanto USUARIO como PACIENTE como roles de paciente
+        this.isPatient = role === 'USUARIO' || role === 'PACIENTE';
+        this.isMedico = role === 'MEDICO';
 
         if (username) {
             this.userName = username;
@@ -110,13 +114,43 @@ export class GestionCitaComponent implements OnInit {
 
                     if (this.isPatient) {
                         this.pacienteService.listar().subscribe(pacientes => {
-                            const found = pacientes.find(p =>
-                                p.nombres.toLowerCase().includes(username.toLowerCase()) ||
-                                p.apellidos.toLowerCase().includes(username.toLowerCase())
+                            console.log('Buscando paciente para:', username);
+                            console.log('Pacientes disponibles:', pacientes);
+
+                            let found = pacientes.find(p =>
+                                p.correo?.toLowerCase().trim() === username.toLowerCase().trim()
                             );
+
+                            // Fallback: si no coincide por correo, intentar por nombres (menos preciso)
+                            if (!found) {
+                                found = pacientes.find(p =>
+                                    username.toLowerCase().includes(p.nombres.toLowerCase()) ||
+                                    username.toLowerCase().includes(p.apellidos.toLowerCase())
+                                );
+                            }
+
                             if (found) {
                                 this.currentPatientId = found.idPaciente;
                                 this.patientName = `${found.nombres} ${found.apellidos}`;
+                                console.log('Paciente vinculado:', this.patientName, 'ID:', this.currentPatientId);
+                                this.applyFilter();
+                                // Si el modal ya estaba "pendiente" de cargar datos, lo abrimos
+                                if (this.showModal && !this.nuevaCita.idPaciente) {
+                                    this.nuevaCita.idPaciente = found.idPaciente;
+                                }
+                            } else {
+                                console.warn('No se encontró paciente para:', username);
+                            }
+                        });
+                    } else if (this.isMedico) {
+                        // Si es médico, buscar su ID de médico
+                        this.medicoService.listar().subscribe(medicos => {
+                            const found = medicos.find(m =>
+                                m.correo?.toLowerCase().trim() === username.toLowerCase().trim()
+                            );
+                            if (found) {
+                                this.currentMedicoId = found.idMedico;
+                                console.log('Médico vinculado ID:', this.currentMedicoId);
                                 this.applyFilter();
                             }
                         });
@@ -130,13 +164,18 @@ export class GestionCitaComponent implements OnInit {
         const term = this.searchTerm.toLowerCase();
 
         this.filteredCitas = this.citas.filter(c => {
-            const matchesRole = !this.isPatient || (this.currentPatientId !== null && c.idPaciente === this.currentPatientId);
+            // Filtro por Rol:
+            // Pacientes solo ven sus propias citas
+            const matchesPatient = !this.isPatient || (this.currentPatientId !== null && c.idPaciente === this.currentPatientId);
+            // Médicos solo ven sus propias citas
+            const matchesMedico = !this.isMedico || (this.currentMedicoId !== null && c.idMedico === this.currentMedicoId);
+
             const matchesTerm = c.nombrePaciente.toLowerCase().includes(term) ||
                 c.nombreMedico.toLowerCase().includes(term) ||
                 c.motivo.toLowerCase().includes(term) ||
                 c.estado.toLowerCase().includes(term);
 
-            return matchesRole && matchesTerm;
+            return matchesPatient && matchesMedico && matchesTerm;
         });
     }
 
@@ -147,6 +186,11 @@ export class GestionCitaComponent implements OnInit {
     openModal(): void {
         this.showModal = true;
         this.successMessage = '';
+
+        if (this.isPatient && !this.currentPatientId) {
+            // Intentar cargar de nuevo si no está listo
+            this.obtenerUsuarioActual();
+        }
         this.nuevaCita = {
             fecha: '',
             hora: '',
@@ -164,8 +208,23 @@ export class GestionCitaComponent implements OnInit {
     }
 
     registrarCita(): void {
-        if (!this.nuevaCita.fecha || !this.nuevaCita.hora || !this.nuevaCita.idPaciente || !this.nuevaCita.idMedico) {
-            alert('Complete los campos obligatorios');
+        // Asegurar que los IDs estén sincronizados antes de validar
+        if (this.isPatient && !this.nuevaCita.idPaciente && this.currentPatientId) {
+            this.nuevaCita.idPaciente = this.currentPatientId;
+        }
+        if (!this.nuevaCita.idUsuario && this.currentUserId) {
+            this.nuevaCita.idUsuario = this.currentUserId;
+        }
+
+        // Validación detallada
+        const missing = [];
+        if (!this.nuevaCita.fecha) missing.push('Fecha');
+        if (!this.nuevaCita.hora) missing.push('Hora');
+        if (!this.nuevaCita.idPaciente) missing.push('Paciente (ID no cargado)');
+        if (!this.nuevaCita.idMedico) missing.push('Médico');
+
+        if (missing.length > 0) {
+            alert('Por favor complete los siguientes campos: ' + missing.join(', '));
             return;
         }
 
@@ -240,6 +299,15 @@ export class GestionCitaComponent implements OnInit {
             this.citaService.cancelar(id).subscribe({
                 next: () => this.cargarDatos(),
                 error: () => alert('No se pudo cancelar la cita')
+            });
+        }
+    }
+
+    atenderCita(id: number): void {
+        if (confirm('¿Desea marcar esta cita como ATENDIDA?')) {
+            this.citaService.atender(id).subscribe({
+                next: () => this.cargarDatos(),
+                error: () => alert('Error al procesar la cita')
             });
         }
     }

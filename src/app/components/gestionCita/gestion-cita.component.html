@@ -87,6 +87,10 @@
                         </td>
                         <td>
                             <div class="action-buttons">
+                                <button *ngIf="cita.estado === 'PENDIENTE' && !isPatient" class="btn-icon check"
+                                    (click)="atenderCita(cita.idCita)" title="Atender Cita">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
                                 <button class="btn-icon edit" (click)="openEditModal(cita)" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -129,8 +133,9 @@
 
                     <div class="form-group full-width" *ngIf="isPatient">
                         <label>Reserva para:</label>
-                        <div class="read-only-field">
-                            <i class="fas fa-user"></i> {{ patientName }}
+                        <div class="patient-pill">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{{ patientName }}</span>
                         </div>
                         <input type="hidden" name="idPaciente" [(ngModel)]="nuevaCita.idPaciente">
                     </div>

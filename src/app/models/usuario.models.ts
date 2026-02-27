@@ -9,6 +9,7 @@ export interface UsuarioResponse {
     username: string;
     rolNombre: string;
     rolId?: number | null;
+    password?: string;
     estado: boolean;
     fechaCreacion: string;
 }

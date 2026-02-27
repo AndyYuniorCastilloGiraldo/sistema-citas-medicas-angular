@@ -7,6 +7,9 @@ import { MedicoService } from '../../services/medico.service';
 import { EspecialidadResponse } from '../../models/especialidad.models';
 import { EspecialidadService } from '../../services/especialidad.service';
 
+import { UsuarioService } from '../../services/usuario.service';
+import { UsuarioRequest } from '../../models/usuario.models';
+
 @Component({
     selector: 'app-gestion-medico',
     standalone: true,
@@ -18,6 +21,7 @@ export class GestionMedicoComponent implements OnInit {
 
     private medicoService = inject(MedicoService);
     private especialidadService = inject(EspecialidadService);
+    private usuarioService = inject(UsuarioService);
     private router = inject(Router);
 
     medicos: MedicoResponse[] = [];
@@ -49,6 +53,7 @@ export class GestionMedicoComponent implements OnInit {
     };
 
     medicoEditar: MedicoResponse | null = null;
+    passwordMedico: string = '';
 
     ngOnInit(): void {
         this.cargarMedicos();
@@ -119,6 +124,11 @@ export class GestionMedicoComponent implements OnInit {
     }
 
     registrarMedico(): void {
+        if (this.nuevoMedico.correo && !this.nuevoMedico.correo.includes('@')) {
+            alert('El correo electrónico debe contener un símbolo "@".');
+            return;
+        }
+
         if (!this.nuevoMedico.nombres || !this.nuevoMedico.apellidos || !this.nuevoMedico.cmp || !this.nuevoMedico.idEspecialidad) {
             alert('Complete los campos obligatorios (Nombres, Apellidos, CMP, Especialidad)');
             return;
@@ -129,12 +139,29 @@ export class GestionMedicoComponent implements OnInit {
 
         this.medicoService.crear(this.nuevoMedico)
             .subscribe({
-                next: () => {
-                    this.isSaving = false;
-                    this.successMessage = 'Médico registrado correctamente';
-                    this.cargarMedicos();
-                    this.nuevoMedico = { nombres: '', apellidos: '', cmp: '', telefono: '', correo: '', idEspecialidad: 0 };
-                    setTimeout(() => this.successMessage = '', 3000);
+                next: (medico) => {
+                    // Después de crear al médico, creamos su usuario
+                    const usuarioReq: UsuarioRequest = {
+                        username: this.nuevoMedico.correo || this.nuevoMedico.cmp,
+                        password: this.passwordMedico || 'Medico123*',
+                        rolId: 3
+                    };
+
+                    this.usuarioService.crear(usuarioReq).subscribe({
+                        next: () => {
+                            this.isSaving = false;
+                            this.successMessage = 'Médico y usuario creados correctamente. Credenciales: ' + usuarioReq.username + ' / ' + usuarioReq.password;
+                            this.cargarMedicos();
+                            this.nuevoMedico = { nombres: '', apellidos: '', cmp: '', telefono: '', correo: '', idEspecialidad: 0 };
+                            this.passwordMedico = '';
+                            setTimeout(() => this.successMessage = '', 10000);
+                        },
+                        error: () => {
+                            this.isSaving = false;
+                            alert('Médico creado pero hubo un error al crear su usuario');
+                            this.cargarMedicos();
+                        }
+                    });
                 },
                 error: () => {
                     this.isSaving = false;

@@ -181,6 +181,15 @@
     color: #94a3b8;
 }
 
+.password-text {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #475569;
+}
+
 .user-cell {
     display: flex;
     align-items: center;

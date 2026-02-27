@@ -1,78 +1,61 @@
 <div class="dashboard-content">
-    <header class="content-header">
-        <h2>Panel de Administración</h2>
-        <p>Visión global del sistema médico</p>
-    </header>
 
-    <div class="stats-grid dashboard-3-cols">
-        <div class="stat-card blue">
-            <div class="icon-box"><i class="fas fa-users-cog"></i></div>
-            <div class="stat-info">
-                <span class="value">{{ totalUsuarios }}</span>
-                <span class="label">Usuarios Totales</span>
-            </div>
-        </div>
-        <div class="stat-card patient">
-            <div class="icon-box"><i class="fas fa-procedures"></i></div>
-            <div class="stat-info">
-                <span class="value">{{ totalPacientes }}</span>
-                <span class="label">Pacientes Registrados</span>
-            </div>
-        </div>
-        <div class="stat-card orange">
-            <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-            <div class="stat-info">
-                <span class="value">{{ totalCitas }}</span>
-                <span class="label">Citas Totales</span>
-            </div>
-        </div>
+  <header class="content-header">
+    <h2>Panel de Administración</h2>
+    <p>Listado general de citas médicas</p>
+  </header>
+
+  <!-- LISTA DE CITAS -->
+  <div class="dashboard-section glass-card">
+    <div class="section-header">
+      <h3>
+        <i class="fas fa-clipboard-list"></i>
+        Citas Registradas
+      </h3>
+      <p>Agenda completa del sistema</p>
     </div>
+<button class="btn-listar" (click)="cargarCitas()">
+      <i class="fas fa-sync-alt"></i> Listar
+    </button>
+    <div class="table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
 
-    <!-- APPOINTMENT LIST SECTION -->
-    <div class="dashboard-section glass-card">
-        <div class="section-header">
-            <h3><i class="fas fa-clipboard-list"></i> Monitor de Citas Recientes</h3>
-            <p>Seguimiento en tiempo real de la agenda médica global</p>
-        </div>
+        <tbody>
+          <tr *ngFor="let cita of citasRecientes">
+            <td>{{ cita.nombrePaciente }}</td>
+            <td>Dr. {{ cita.nombreMedico }}</td>
+            <td>{{ cita.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ cita.hora }}</td>
+            <td>{{ cita.motivo }}</td>
+            <td>
+              <span class="status-indicator"
+                    [ngClass]="getStatusClass(cita.estado)">
+                {{ cita.estado }}
+              </span>
+            </td>
+          </tr>
 
-        <div class="table-container">
-            <table class="dashboard-table">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Médico</th>
-                        <th>Fecha y Hora</th>
-                        <th>Motivo</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let cita of citasRecientes">
-                        <td>
-                            <div class="user-id-cell">
-                                <div class="avatar-sm"><i class="fas fa-user-injured"></i></div>
-                                <span>{{ cita.nombrePaciente }}</span>
-                            </div>
-                        </td>
-                        <td>Dr. {{ cita.nombreMedico }}</td>
-                        <td>
-                            <div class="datetime-compact">
-                                <span class="d">{{ cita.fecha | date:'dd/MM/yyyy' }}</span>
-                                <span class="t">{{ cita.hora }}</span>
-                            </div>
-                        </td>
-                        <td class="motivo-cell">{{ cita.motivo }}</td>
-                        <td>
-                            <span class="status-indicator" [ngClass]="getStatusClass(cita.estado)">
-                                {{ cita.estado }}
-                            </span>
-                        </td>
-                    </tr>
-                    <tr *ngIf="citasRecientes.length === 0 && !isLoading">
-                        <td colspan="5" class="empty-msg">No se encontraron citas en el sistema.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+          <tr *ngIf="citasRecientes.length === 0 && !isLoading">
+            <td colspan="6" class="empty-msg">
+              No hay citas registradas.
+            </td>
+          </tr>
+
+         
+          
+        </tbody>
+      </table>
     </div>
+  </div>
+
 </div>

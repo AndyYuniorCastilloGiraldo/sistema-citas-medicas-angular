@@ -1,69 +1,82 @@
 <div class="dashboard-content">
-    <header class="content-header">
-        <h2>Panel Médico</h2>
-        <p>Gestión de sus consultas y pacientes</p>
+    <header class="content-header" *ngIf="currentMedico">
+        <h2>Panel Médico: Dr. {{ currentMedico.nombres }} {{ currentMedico.apellidos }}</h2>
+        <p>Gestión de sus consultas y pacientes - <span class="specialty-badge">{{ currentMedico.nombreEspecialidad
+                }}</span></p>
     </header>
 
-    <div class="stats-grid">
-        <div class="stat-card emerald">
-            <div class="icon-box"><i class="fas fa-calendar-alt"></i></div>
-            <div class="stat-info">
-                <span class="value">8</span>
-                <span class="label">Citas para hoy</span>
-            </div>
-        </div>
-        <div class="stat-card sky">
-            <div class="icon-box"><i class="fas fa-user-injured"></i></div>
-            <div class="stat-info">
-                <span class="value">120</span>
-                <span class="label">Mis Pacientes</span>
-            </div>
-        </div>
-        <div class="stat-card amber">
-            <div class="icon-box"><i class="fas fa-star"></i></div>
-            <div class="stat-info">
-                <span class="value">4.9</span>
-                <span class="label">Calificación</span>
-            </div>
-        </div>
+    <!-- LOADING STATE -->
+    <div *ngIf="isLoading" class="loader-container">
+        <div class="spinner"></div>
+        <p>Cargando información del dashboard...</p>
     </div>
 
-    <div class="agenda-section">
-        <div class="section-header">
-            <h3>Próximas Citas</h3>
-            <button class="btn-text">Ver todas <i class="fas fa-chevron-right"></i></button>
+    <!-- DASHBOARD CONTENT -->
+    <div *ngIf="!isLoading">
+        <div class="stats-grid">
+            <div class="stat-card emerald">
+                <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-info">
+                    <span class="value">{{ stats.citasHoy }}</span>
+                    <span class="label">Citas para hoy</span>
+                </div>
+            </div>
+            <div class="stat-card sky">
+                <div class="icon-box"><i class="fas fa-user-injured"></i></div>
+                <div class="stat-info">
+                    <span class="value">{{ stats.totalPacientes }}</span>
+                    <span class="label">Mis Pacientes</span>
+                </div>
+            </div>
+            <div class="stat-card amber">
+                <div class="icon-box"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <span class="value">{{ stats.calificacion }}</span>
+                    <span class="label">Calificación</span>
+                </div>
+            </div>
         </div>
-        <div class="appointment-list">
-            <div class="appointment-card">
-                <div class="time-box">
-                    <span class="time">09:00</span>
-                    <span class="period">AM</span>
-                </div>
-                <div class="patient-profile">
-                    <div class="avatar-sm">JP</div>
-                    <div class="info">
-                        <span class="name">Juan Pérez</span>
-                        <span class="reason">Control General</span>
-                    </div>
-                </div>
-                <div class="status-badge">Confirmado</div>
-                <button class="btn-action">Atender</button>
+
+        <div class="agenda-section">
+            <div class="section-header">
+                <h3>Mis Próximas Citas</h3>
+                <span class="badge">{{ citas.length }} Citas Totales</span>
             </div>
 
-            <div class="appointment-card">
-                <div class="time-box">
-                    <span class="time">10:30</span>
-                    <span class="period">AM</span>
-                </div>
-                <div class="patient-profile">
-                    <div class="avatar-sm">MG</div>
-                    <div class="info">
-                        <span class="name">María García</span>
-                        <span class="reason">Revisión de Análisis</span>
+            <div class="appointment-list">
+                <!-- ITERATE OVER CITAS -->
+                <div class="appointment-card" *ngFor="let cita of citas">
+                    <div class="time-box">
+                        <span class="time">{{ cita.hora.split(':')[0] + ':' + cita.hora.split(':')[1] }}</span>
+                        <!-- Determinar AM/PM si es necesario, o solo mostrar hora -->
+                    </div>
+                    <div class="patient-profile">
+                        <div class="avatar-sm">{{ cita.nombrePaciente.charAt(0) }}</div>
+                        <div class="info">
+                            <span class="name">{{ cita.nombrePaciente }}</span>
+                            <span class="reason">{{ cita.motivo }}</span>
+                        </div>
+                    </div>
+                    <div class="status-col">
+                        <span class="status-badge" [ngClass]="getStatusClass(cita.estado)">
+                            {{ cita.estado }}
+                        </span>
+                        <span class="date-label">{{ cita.fecha | date:'dd/MM' }}</span>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-action" *ngIf="cita.estado === 'PENDIENTE'"
+                            (click)="atenderCita(cita.idCita)">
+                            <i class="fas fa-check-circle"></i> Atender
+                        </button>
                     </div>
                 </div>
-                <div class="status-badge">Confirmado</div>
-                <button class="btn-action">Atender</button>
+
+                <!-- EMPTY STATE -->
+                <div class="empty-state" *ngIf="citas.length === 0">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No tiene citas programadas.</p>
+                </div>
             </div>
         </div>
     </div>

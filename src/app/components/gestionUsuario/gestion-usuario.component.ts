@@ -4,6 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsuarioResponse, UsuarioRequest } from '../../models/usuario.models';
 import { UsuarioService } from '../../services/usuario.service';
+import { MedicoService } from '../../services/medico.service';
+import { PacienteService } from '../../services/paciente.service';
+import { MedicoResponse } from '../../models/medico.models';
+import { PacienteResponse } from '../../models/paciente.models';
+import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-gestion-usuario',
@@ -15,10 +20,14 @@ import { UsuarioService } from '../../services/usuario.service';
 export class GestionUsuarioComponent implements OnInit {
 
     private usuarioService = inject(UsuarioService);
+    private medicoService = inject(MedicoService);
+    private pacienteService = inject(PacienteService);
     private router = inject(Router);
 
     usuarios: UsuarioResponse[] = [];
     filteredUsuarios: UsuarioResponse[] = [];
+    medicos: MedicoResponse[] = [];
+    pacientes: PacienteResponse[] = [];
 
     searchTerm: string = '';
     selectedRole: string = '';
@@ -56,18 +65,40 @@ export class GestionUsuarioComponent implements OnInit {
         this.isLoading = true;
         this.errorMessage = '';
 
-        this.usuarioService.listar()
-            .subscribe({
-                next: (data) => {
-                    this.usuarios = data;
-                    this.applyFilter();
-                    this.isLoading = false;
-                },
-                error: () => {
-                    this.errorMessage = 'Error al cargar usuarios.';
-                    this.isLoading = false;
-                }
-            });
+        forkJoin({
+            usuarios: this.usuarioService.listar(),
+            medicos: this.medicoService.listar(),
+            pacientes: this.pacienteService.listar()
+        }).subscribe({
+            next: (data) => {
+                this.usuarios = data.usuarios;
+                this.medicos = data.medicos;
+                this.pacientes = data.pacientes;
+                this.applyFilter();
+                this.isLoading = false;
+            },
+            error: () => {
+                this.errorMessage = 'Error al cargar usuarios o datos relacionados.';
+                this.isLoading = false;
+            }
+        });
+    }
+
+    getNombreReal(username: string): string {
+        const u = username.toLowerCase().trim();
+
+        // Buscar en médicos
+        const medico = this.medicos.find(m =>
+            m.correo?.toLowerCase().trim() === u ||
+            m.cmp?.toLowerCase().trim() === u
+        );
+        if (medico) return `${medico.nombres} ${medico.apellidos}`;
+
+        // Buscar en pacientes
+        const paciente = this.pacientes.find(p => p.correo?.toLowerCase().trim() === u);
+        if (paciente) return `${paciente.nombres} ${paciente.apellidos}`;
+
+        return 'No vinculado';
     }
 
     applyFilter(): void {

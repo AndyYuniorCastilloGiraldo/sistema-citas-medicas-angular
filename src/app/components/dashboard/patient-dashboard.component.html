@@ -20,28 +20,7 @@
         </div>
     </div>
 
-    <div class="full-width-section">
-        <div class="card glass-card">
-            <div class="card-header">
-                <h3>Mis Próximas Citas</h3>
-                <button class="icon-btn" (click)="nuevaCita()"><i class="fas fa-plus"></i></button>
-            </div>
-
-            <!-- LOADING -->
-            <div *ngIf="isLoading" class="list-loader">
-                <div class="spinner-sm"></div>
-                <span>Actualizando agenda...</span>
-            </div>
-
-            <!-- EMPTY STATE -->
-            <div *ngIf="!isLoading && misCitas.length === 0" class="empty-state">
-                <div class="icon-bg">
-                    <i class="far fa-calendar-times"></i>
-                </div>
-                <p>No tiene citas programadas próximamente.</p>
-                <button class="btn-secondary" (click)="nuevaCita()">Explorar Médicos</button>
-            </div>
-
+    
             <!-- APPOINTMENTS LIST -->
             <div *ngIf="!isLoading && misCitas.length > 0" class="appointments-list">
                 <div *ngFor="let cita of misCitas" class="appt-item">
@@ -64,5 +43,4 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+   

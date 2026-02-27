@@ -99,7 +99,7 @@
                 <button class="btn-close" (click)="closeModal()">&times;</button>
             </header>
 
-            <form (ngSubmit)="registrarMedico()" class="modal-form">
+            <form (ngSubmit)="registrarMedico()" class="modal-form" autocomplete="off">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nombres</label>
@@ -121,6 +121,13 @@
                                 {{ esp.nombre }}
                             </option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contraseña para el Usuario</label>
+                        <input type="password" name="passwordMedico" [(ngModel)]="passwordMedico"
+                            placeholder="Deje en blanco para usar por defecto">
+                        <small>Se creará una cuenta con este password.</small>
                     </div>
                     <div class="form-group">
                         <label>Teléfono</label>

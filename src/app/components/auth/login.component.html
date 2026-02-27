@@ -10,11 +10,11 @@
 
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="auth-form">
             <div class="form-group">
-                <label for="username">Usuario</label>
+                <label for="username">Correo Electrónico</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-envelope"></i>
                     <input type="text" id="username" name="username" [(ngModel)]="loginData.username" required
-                        placeholder="Ingrese su usuario" #username="ngModel"
+                        placeholder="ejemplo@correo.com" #username="ngModel"
                         [class.invalid]="username.touched && username.invalid">
                 </div>
             </div>

@@ -97,7 +97,7 @@
                 <button class="btn-close" (click)="closeModal()">&times;</button>
             </header>
 
-            <form (ngSubmit)="registrarPaciente()" class="modal-form">
+            <form (ngSubmit)="registrarPaciente()" class="modal-form" autocomplete="off">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Nombres</label>
@@ -116,8 +116,14 @@
                         <input type="text" name="telefono" [(ngModel)]="nuevoPaciente.telefono">
                     </div>
                     <div class="form-group full-width">
-                        <label>Correo Electrónico</label>
-                        <input type="email" name="correo" [(ngModel)]="nuevoPaciente.correo">
+                        <label>Correo Electrónico (Será su Usuario)</label>
+                        <input type="email" name="correo" [(ngModel)]="nuevoPaciente.correo" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Contraseña para el Usuario</label>
+                        <input type="password" name="passwordPaciente" [(ngModel)]="passwordPaciente"
+                            placeholder="Deje en blanco para usar por defecto (Paciente123*)">
+                        <small>Se creará una cuenta con este password.</small>
                     </div>
                     <div class="form-group full-width">
                         <label>Dirección</label>
