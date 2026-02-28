@@ -107,7 +107,7 @@ export class GestionCitaComponent implements OnInit {
         if (username) {
             this.userName = username;
             this.usuarioService.listar().subscribe(usuarios => {
-                const user = usuarios.find(u => u.username === username);
+                const user = usuarios.find(u => u.email?.toLowerCase().trim() === username.toLowerCase().trim() || u.username?.toLowerCase().trim() === username.toLowerCase().trim());
                 if (user) {
                     this.currentUserId = user.idUsuario;
                     this.nuevaCita.idUsuario = user.idUsuario;
