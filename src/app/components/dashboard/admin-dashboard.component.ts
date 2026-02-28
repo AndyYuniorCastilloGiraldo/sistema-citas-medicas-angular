@@ -44,7 +44,7 @@ export class AdminDashboardComponent implements OnInit {
     if (!estado) return '';
     const e = estado.toLowerCase();
     if (e.includes('pendiente')) return 'status-pending';
-    if (e.includes('completada')) return 'status-completed';
+    if (e.includes('atendid') || e.includes('completada')) return 'status-completed';
     if (e.includes('cancelada')) return 'status-cancelled';
     return '';
   }

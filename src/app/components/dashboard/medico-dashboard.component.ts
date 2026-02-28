@@ -75,10 +75,14 @@ export class MedicoDashboardComponent implements OnInit {
         if (confirm('¿Desea marcar esta cita como ATENDIDA?')) {
             this.citaService.atender(idCita).subscribe({
                 next: () => {
-                    alert('Cita atendida correctamente');
-                    if (this.currentMedico) {
-                        this.cargarCitas(this.currentMedico.idMedico);
+                    // Actualizar el estado localmente para reflejar el cambio en la UI
+                    const cita = this.citas.find(c => c.idCita === idCita);
+                    if (cita) {
+                        cita.estado = 'ATENDIDA';
                     }
+                    // Recalcular estadísticas
+                    const hoy = new Date().toISOString().split('T')[0];
+                    this.stats.citasHoy = this.citas.filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
                 },
                 error: () => alert('Error al procesar la cita')
             });
@@ -88,7 +92,7 @@ export class MedicoDashboardComponent implements OnInit {
     getStatusClass(estado: string): string {
         const e = estado.toLowerCase();
         if (e.includes('pendiente')) return 'status-pending';
-        if (e.includes('atendido') || e.includes('completada')) return 'status-completed';
+        if (e.includes('atendid') || e.includes('completada')) return 'status-completed';
         if (e.includes('cancelada')) return 'status-cancelled';
         return '';
     }
