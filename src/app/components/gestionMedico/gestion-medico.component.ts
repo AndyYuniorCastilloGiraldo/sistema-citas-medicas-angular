@@ -128,9 +128,10 @@ export class GestionMedicoComponent implements OnInit {
     // 1️⃣ CREAR MÉDICO
     this.medicoService.crear(this.nuevoMedico).subscribe({
       next: () => {
-        // 2️⃣ CREAR USUARIO con correo como username
+        // 2️⃣ CREAR USUARIO con correo como email
         const usuarioReq: UsuarioRequest = {
-          username: this.nuevoMedico.correo.trim(),  // ← aquí usamos correo como username
+          username: this.nuevoMedico.nombres,
+          email: this.nuevoMedico.correo.trim(),
           password: this.passwordMedico?.trim() || 'Medico123*',
           rolId: 3
         };
@@ -139,7 +140,7 @@ export class GestionMedicoComponent implements OnInit {
           next: () => {
             this.isSaving = false;
             this.successMessage =
-              `Médico y usuario creados correctamente.\nUsuario: ${usuarioReq.username}\nPassword: ${usuarioReq.password}`;
+              `Médico y usuario creados correctamente.\nEmail: ${usuarioReq.email}\nPassword: ${usuarioReq.password}`;
             this.cargarMedicos();
             this.closeModal();
             setTimeout(() => this.successMessage = '', 8000);

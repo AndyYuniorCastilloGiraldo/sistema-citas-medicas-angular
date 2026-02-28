@@ -599,3 +599,40 @@ input:checked+.slider:before {
     color: #64748b;
     margin-bottom: 25px;
 }
+
+/* ===================== GRID DINÁMICO ===================== */
+.dynamic-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 15px;
+}
+
+.form-group.full-width,
+.form-group:not(.dynamic-form-grid > div) {
+    grid-column: 1 / -1;
+}
+
+.dynamic-form-grid .form-group {
+    margin-bottom: 15px;
+}
+
+.select-premium {
+    background-color: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.disabled-input {
+    background-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+    border-color: #e2e8f0 !important;
+}
+
+.hint {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 5px;
+}

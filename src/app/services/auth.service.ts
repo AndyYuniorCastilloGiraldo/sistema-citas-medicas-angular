@@ -25,7 +25,7 @@ export class AuthService {
                     // Normalizar el rol eliminando el prefijo ROLE_ si existe
                     const normalizedRole = response.rol.replace('ROLE_', '');
                     localStorage.setItem('token', response.token);
-                    localStorage.setItem('username', response.username);
+                    localStorage.setItem('email', response.username);
                     localStorage.setItem('role', normalizedRole);
                 }
             })
@@ -58,7 +58,7 @@ export class AuthService {
 
     getUsername(): string | null {
         if (this.isBrowser()) {
-            return localStorage.getItem('username');
+            return localStorage.getItem('email');
         }
         return null;
     }

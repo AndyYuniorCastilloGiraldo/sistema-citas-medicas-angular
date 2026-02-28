@@ -131,9 +131,10 @@ export class GestionPacienteComponent implements OnInit {
         this.pacienteService.crear(this.nuevoPaciente).subscribe({
             next: () => {
 
-                // 2️⃣ CREAR USUARIO (MISMO CORREO = USERNAME)
+                // 2️⃣ CREAR USUARIO (MISMO CORREO = EMAIL)
                 const usuarioReq: UsuarioRequest = {
-                    username: this.nuevoPaciente.correo,
+                    username: this.nuevoPaciente.nombres,
+                    email: this.nuevoPaciente.correo,
                     password: this.passwordPaciente?.trim() || 'Paciente123*',
                     rolId: 2
                 };
@@ -143,7 +144,7 @@ export class GestionPacienteComponent implements OnInit {
                         this.isSaving = false;
                         this.successMessage =
                             `Paciente y usuario creados correctamente.
-Usuario: ${usuarioReq.username}
+Email: ${usuarioReq.email}
 Password: ${usuarioReq.password}`;
 
                         this.cargarPacientes();

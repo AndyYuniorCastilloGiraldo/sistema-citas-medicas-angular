@@ -59,12 +59,12 @@
 
             <!-- CREDENCIALES -->
             <div class="form-group">
-                <label for="username">Correo Electrónico (Será su Usuario)</label>
+                <label for="email">Correo Electrónico (Será su Usuario)</label>
                 <div class="input-wrapper">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="username" name="username" [(ngModel)]="registerData.username" required
-                        placeholder="ejemplo@correo.com" #username="ngModel"
-                        [class.invalid]="username.touched && username.invalid">
+                    <input type="email" id="email" name="email" [(ngModel)]="registerData.email" required
+                        placeholder="ejemplo@correo.com" #email="ngModel"
+                        [class.invalid]="email.touched && email.invalid">
                 </div>
             </div>
 

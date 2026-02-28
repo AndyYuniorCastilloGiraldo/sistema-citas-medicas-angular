@@ -123,22 +123,88 @@
             </header>
 
             <form (ngSubmit)="registrarUsuario()" class="modal-form">
-                <div class="form-group">
-                    <label>Nombre de Usuario</label>
-                    <input type="text" name="username" [(ngModel)]="nuevoUsuario.username" required>
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" name="password" [(ngModel)]="nuevoUsuario.password" required>
-                </div>
-                <div class="form-group">
-                    <label>Asignar Rol</label>
-                    <select name="rolId" [(ngModel)]="nuevoUsuario.rolId" required>
+                <div class="form-group full-width">
+                    <label>Asignar Rol del Usuario</label>
+                    <select name="rolId" [(ngModel)]="nuevoUsuario.rolId" required class="select-premium">
+                        <option [ngValue]="null" disabled selected>Seleccione el rol...</option>
                         <option [ngValue]="1">Administrador</option>
                         <option [ngValue]="3">Médico</option>
                         <option [ngValue]="2">Paciente</option>
                     </select>
                 </div>
+
+                <ng-container *ngIf="nuevoUsuario.rolId">
+                    <div class="dynamic-form-grid">
+                        <div class="form-group">
+                            <label>Correo Electrónico (Login)</label>
+                            <input type="email" name="email" [(ngModel)]="nuevoUsuario.email" required
+                                placeholder="ejemplo@correo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" name="password" [(ngModel)]="nuevoUsuario.password" required>
+                        </div>
+
+                        <!-- ADMIN -->
+                        <div class="form-group full-width" *ngIf="nuevoUsuario.rolId === 1">
+                            <label>Nombre de Usuario (Para mostrar)</label>
+                            <input type="text" name="nombresAdmin" [(ngModel)]="nuevoUsuario.username" required>
+                        </div>
+
+                        <!-- PACIENTE -->
+                        <ng-container *ngIf="nuevoUsuario.rolId === 2">
+                            <div class="form-group">
+                                <label>Nombres</label>
+                                <input type="text" name="pNombres" [(ngModel)]="nuevoUsuario.username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Apellidos</label>
+                                <input type="text" name="pApellidos" [(ngModel)]="nuevoPaciente.apellidos" required>
+                            </div>
+                            <div class="form-group">
+                                <label>DNI</label>
+                                <input type="text" name="pDni" [(ngModel)]="nuevoPaciente.dni" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" name="pTelefono" [(ngModel)]="nuevoPaciente.telefono">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Dirección</label>
+                                <input type="text" name="pDireccion" [(ngModel)]="nuevoPaciente.direccion">
+                            </div>
+                        </ng-container>
+
+                        <!-- MEDICO -->
+                        <ng-container *ngIf="nuevoUsuario.rolId === 3">
+                            <div class="form-group">
+                                <label>Nombres</label>
+                                <input type="text" name="mNombres" [(ngModel)]="nuevoUsuario.username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Apellidos</label>
+                                <input type="text" name="mApellidos" [(ngModel)]="nuevoMedico.apellidos" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CMP</label>
+                                <input type="text" name="mCmp" [(ngModel)]="nuevoMedico.cmp" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" name="mTelefono" [(ngModel)]="nuevoMedico.telefono">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Especialidad</label>
+                                <select name="mEspecialidad" [(ngModel)]="nuevoMedico.idEspecialidad" required>
+                                    <option [ngValue]="0" disabled selected>Seleccione Especialidad...</option>
+                                    <option *ngFor="let esp of especialidades" [ngValue]="esp.idEspecialidad">
+                                        {{ esp.nombre }}
+                                    </option>
+                                </select>
+                            </div>
+                        </ng-container>
+                    </div>
+                </ng-container>
 
                 <!-- MENSAJE DE ÉXITO -->
                 <div *ngIf="successMessage" class="success-message">
@@ -147,7 +213,7 @@
 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary" [disabled]="isSaving">
+                    <button type="submit" class="btn-primary" [disabled]="isSaving || !nuevoUsuario.rolId">
                         <span *ngIf="isSaving" class="btn-spinner"></span>
                         {{ isSaving ? 'Guardando...' : 'Registrar Usuario' }}
                     </button>
@@ -165,17 +231,81 @@
             </header>
 
             <form (ngSubmit)="actualizarUsuario()" class="modal-form">
-                <div class="form-group">
-                    <label>Nombre de Usuario</label>
-                    <input type="text" name="editUsername" [(ngModel)]="usuarioEditar.username" required>
-                </div>
-                <div class="form-group">
-                    <label>Rol</label>
-                    <select name="editRol" [(ngModel)]="usuarioEditar.rolId" required>
-                        <option [ngValue]="1">Administrador</option>
-                        <option [ngValue]="2">Usuario</option>
-                        <option [ngValue]="3">Medico</option>
-                    </select>
+
+                <div class="dynamic-form-grid">
+                    <div class="form-group">
+                        <label>Rol Actual</label>
+                        <select name="editRol" [(ngModel)]="usuarioEditar.rolId" required disabled
+                            class="disabled-input">
+                            <option [ngValue]="1">Administrador</option>
+                            <option [ngValue]="2">Paciente</option>
+                            <option [ngValue]="3">Médico</option>
+                        </select>
+                        <small class="hint">El rol no se puede cambiar aquí.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo Electrónico (Login)</label>
+                        <input type="email" name="editEmail" [(ngModel)]="usuarioEditar.email" required>
+                    </div>
+
+                    <!-- ADMIN -->
+                    <div class="form-group full-width" *ngIf="usuarioEditar.rolNombre === 'ROLE_ADMIN'">
+                        <label>Nombre de Usuario (Para mostrar)</label>
+                        <input type="text" name="editUsernameAdmin" [(ngModel)]="usuarioEditar.username" required>
+                    </div>
+
+                    <!-- PACIENTE -->
+                    <ng-container *ngIf="usuarioEditar.rolNombre === 'ROLE_PACIENTE' && pacienteEditar">
+                        <div class="form-group">
+                            <label>Nombres</label>
+                            <input type="text" name="ePNombres" [(ngModel)]="usuarioEditar.username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellidos</label>
+                            <input type="text" name="ePApellidos" [(ngModel)]="pacienteEditar.apellidos" required>
+                        </div>
+                        <div class="form-group">
+                            <label>DNI</label>
+                            <input type="text" name="ePDni" [(ngModel)]="pacienteEditar.dni" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" name="ePTelefono" [(ngModel)]="pacienteEditar.telefono">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Dirección</label>
+                            <input type="text" name="ePDireccion" [(ngModel)]="pacienteEditar.direccion">
+                        </div>
+                    </ng-container>
+
+                    <!-- MEDICO -->
+                    <ng-container *ngIf="usuarioEditar.rolNombre === 'ROLE_MEDICO' && medicoEditar">
+                        <div class="form-group">
+                            <label>Nombres</label>
+                            <input type="text" name="eMNombres" [(ngModel)]="usuarioEditar.username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellidos</label>
+                            <input type="text" name="eMApellidos" [(ngModel)]="medicoEditar.apellidos" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CMP</label>
+                            <input type="text" name="eMCmp" [(ngModel)]="medicoEditar.cmp" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" name="eMTelefono" [(ngModel)]="medicoEditar.telefono">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Especialidad</label>
+                            <select name="eMEspecialidad" [(ngModel)]="medicoEditar.idEspecialidad" required>
+                                <option *ngFor="let esp of especialidades" [ngValue]="esp.idEspecialidad">
+                                    {{ esp.nombre }}
+                                </option>
+                            </select>
+                        </div>
+                    </ng-container>
                 </div>
 
                 <!-- MENSAJE DE ÉXITO -->

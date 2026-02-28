@@ -17,7 +17,7 @@ export class LoginComponent {
     private router = inject(Router);
 
     loginData: LoginRequest = {
-        username: '',
+        email: '',
         password: ''
     };
 
@@ -25,7 +25,7 @@ export class LoginComponent {
     isLoading: boolean = false;
 
     onSubmit(): void {
-        if (this.loginData.username && this.loginData.password) {
+        if (this.loginData.email && this.loginData.password) {
             this.isLoading = true;
             this.errorMessage = '';
 
