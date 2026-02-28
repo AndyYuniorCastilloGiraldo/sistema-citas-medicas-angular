@@ -41,6 +41,7 @@ export class RegisterComponent {
     onSubmit(): void {
 
         this.registerData.email = this.registerData.email.trim().toLowerCase();
+        this.registerData.username = this.pacienteData.nombres;
 
         this.isLoading = true;
         this.errorMessage = '';

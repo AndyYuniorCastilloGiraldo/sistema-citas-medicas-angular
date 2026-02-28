@@ -11,6 +11,7 @@ import { MedicoResponse, MedicoRequest } from '../../models/medico.models';
 import { PacienteResponse, PacienteRequest } from '../../models/paciente.models';
 import { EspecialidadResponse } from '../../models/especialidad.models';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-gestion-usuario',
@@ -21,6 +22,7 @@ import { forkJoin } from 'rxjs';
 })
 export class GestionUsuarioComponent implements OnInit {
 
+    private authService = inject(AuthService);
     private usuarioService = inject(UsuarioService);
     private medicoService = inject(MedicoService);
     private pacienteService = inject(PacienteService);
@@ -149,53 +151,63 @@ export class GestionUsuarioComponent implements OnInit {
             return;
         }
 
+        if (this.nuevoUsuario.rolId === 2) { // Paciente
+            if (!this.nuevoPaciente.apellidos || !this.nuevoPaciente.dni) {
+                alert('Complete los datos obligatorios del paciente (Apellidos, DNI)');
+                return;
+            }
+        } else if (this.nuevoUsuario.rolId === 3) { // Medico
+            if (!this.nuevoMedico.apellidos || !this.nuevoMedico.cmp || !this.nuevoMedico.idEspecialidad) {
+                alert('Complete los datos obligatorios del médico (Apellidos, CMP, Especialidad)');
+                return;
+            }
+        }
+
         this.isSaving = true;
         this.successMessage = '';
 
-        const finalizeUserCreation = () => {
-            this.usuarioService.crear(this.nuevoUsuario)
-                .subscribe({
-                    next: () => {
-                        this.isSaving = false;
-                        this.successMessage = 'Usuario registrado correctamente';
-                        this.cargarUsuarios();
-                        this.nuevoUsuario = { username: '', email: '', password: '', rolId: null };
-                        setTimeout(() => this.successMessage = '', 3000);
-                    },
-                    error: () => {
-                        this.isSaving = false;
-                        alert('Error al crear credenciales de usuario');
-                    }
-                });
+        const finalizeSuccess = () => {
+            this.isSaving = false;
+            this.successMessage = 'Usuario registrado correctamente';
+            this.cargarUsuarios();
+            this.nuevoUsuario = { username: '', email: '', password: '', rolId: null };
+            this.nuevoPaciente = { nombres: '', apellidos: '', dni: '', telefono: '', correo: '', direccion: '' };
+            this.nuevoMedico = { nombres: '', apellidos: '', cmp: '', telefono: '', correo: '', idEspecialidad: 0 };
+            setTimeout(() => this.successMessage = '', 3000);
         };
 
-        if (this.nuevoUsuario.rolId === 2) { // Paciente
-            this.nuevoPaciente.correo = this.nuevoUsuario.email;
-            this.nuevoPaciente.nombres = this.nuevoUsuario.username;
-            if (!this.nuevoPaciente.apellidos || !this.nuevoPaciente.dni) {
-                alert('Complete los datos obligatorios del paciente (Apellidos, DNI)');
-                this.isSaving = false;
-                return;
+        const createProfile = () => {
+            if (this.nuevoUsuario.rolId === 2) { // Paciente
+                this.nuevoPaciente.correo = this.nuevoUsuario.email;
+                this.nuevoPaciente.nombres = this.nuevoUsuario.username;
+                this.pacienteService.crear(this.nuevoPaciente).subscribe({
+                    next: () => finalizeSuccess(),
+                    error: () => { this.isSaving = false; alert('Usuario creado pero error al crear perfil de paciente'); }
+                });
+            } else if (this.nuevoUsuario.rolId === 3) { // Medico
+                this.nuevoMedico.correo = this.nuevoUsuario.email;
+                this.nuevoMedico.nombres = this.nuevoUsuario.username;
+                this.medicoService.crear(this.nuevoMedico).subscribe({
+                    next: () => finalizeSuccess(),
+                    error: () => { this.isSaving = false; alert('Usuario creado pero error al crear perfil de médico'); }
+                });
+            } else {
+                finalizeSuccess();
             }
-            this.pacienteService.crear(this.nuevoPaciente).subscribe({
-                next: () => finalizeUserCreation(),
-                error: () => { this.isSaving = false; alert('Error al crear perfil de paciente'); }
-            });
-        } else if (this.nuevoUsuario.rolId === 3) { // Medico
-            this.nuevoMedico.correo = this.nuevoUsuario.email;
-            this.nuevoMedico.nombres = this.nuevoUsuario.username;
-            if (!this.nuevoMedico.apellidos || !this.nuevoMedico.cmp || !this.nuevoMedico.idEspecialidad) {
-                alert('Complete los datos obligatorios del médico (Apellidos, CMP, Especialidad)');
+        };
+
+        this.authService.register({
+            username: this.nuevoUsuario.username,
+            email: this.nuevoUsuario.email,
+            password: this.nuevoUsuario.password || '',
+            rolId: this.nuevoUsuario.rolId!
+        }).subscribe({
+            next: () => createProfile(),
+            error: () => {
                 this.isSaving = false;
-                return;
+                alert('Error al crear credenciales de usuario');
             }
-            this.medicoService.crear(this.nuevoMedico).subscribe({
-                next: () => finalizeUserCreation(),
-                error: () => { this.isSaving = false; alert('Error al crear perfil de médico'); }
-            });
-        } else {
-            finalizeUserCreation();
-        }
+        });
     }
 
     // =========================
@@ -210,12 +222,16 @@ export class GestionUsuarioComponent implements OnInit {
         const uEmail = usuario.email?.toLowerCase().trim();
         const uName = usuario.username.toLowerCase().trim();
 
-        if (usuario.rolNombre === 'ROLE_PACIENTE') {
+        if (usuario.rolNombre === 'ROLE_PACIENTE' || usuario.rolNombre === 'ROLE_USUARIO') {
+            this.usuarioEditar.rolId = 2;
             const p = this.pacientes.find(x => x.correo?.toLowerCase().trim() === uEmail || x.correo?.toLowerCase().trim() === uName);
             if (p) this.pacienteEditar = { ...p };
         } else if (usuario.rolNombre === 'ROLE_MEDICO') {
+            this.usuarioEditar.rolId = 3;
             const m = this.medicos.find(x => x.correo?.toLowerCase().trim() === uEmail || x.correo?.toLowerCase().trim() === uName);
             if (m) this.medicoEditar = { ...m };
+        } else if (usuario.rolNombre === 'ROLE_ADMIN') {
+            this.usuarioEditar.rolId = 1;
         }
 
         this.showEditModal = true;
@@ -258,7 +274,7 @@ export class GestionUsuarioComponent implements OnInit {
                 });
         };
 
-        if (this.usuarioEditar.rolNombre === 'ROLE_PACIENTE' && this.pacienteEditar) {
+        if ((this.usuarioEditar.rolNombre === 'ROLE_PACIENTE' || this.usuarioEditar.rolNombre === 'ROLE_USUARIO') && this.pacienteEditar) {
             this.pacienteEditar.correo = this.usuarioEditar.email || '';
             this.pacienteEditar.nombres = this.usuarioEditar.username;
             this.pacienteService.actualizar(this.pacienteEditar.idPaciente, this.pacienteEditar).subscribe({
