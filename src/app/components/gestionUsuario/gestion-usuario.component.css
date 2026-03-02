@@ -16,7 +16,6 @@
     }
 }
 
-/* ===================== HEADER ===================== */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -83,7 +82,6 @@
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
-/* ===================== CONTROLES ===================== */
 .controls-card {
     background: white;
     padding: 20px;
@@ -135,7 +133,6 @@
     cursor: pointer;
 }
 
-/* ===================== TABLA ===================== */
 .table-card {
     background: white;
     border-radius: 20px;
@@ -241,7 +238,6 @@
     font-size: 13px;
 }
 
-/* Switch */
 .switch {
     position: relative;
     display: inline-block;
@@ -297,7 +293,6 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
-/* Botones acción */
 .action-buttons {
     display: flex;
     gap: 8px;
@@ -340,7 +335,6 @@ input:checked+.slider:before {
     font-style: italic;
 }
 
-/* Estados carga/error */
 .loader-state,
 .error-state {
     padding: 60px;
@@ -384,7 +378,6 @@ input:checked+.slider:before {
     cursor: pointer;
 }
 
-/* ===================== MODALES ===================== */
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -538,7 +531,6 @@ input:checked+.slider:before {
     cursor: not-allowed;
 }
 
-/* Spinner dentro del botón */
 .btn-spinner {
     width: 16px;
     height: 16px;
@@ -549,7 +541,6 @@ input:checked+.slider:before {
     flex-shrink: 0;
 }
 
-/* Mensaje éxito modal — justo encima de los botones */
 .success-message {
     background: #ecfdf5;
     color: #065f46;
@@ -583,7 +574,6 @@ input:checked+.slider:before {
     }
 }
 
-/* Modal eliminar */
 .delete-modal-content {
     padding: 35px 30px;
     text-align: center;
@@ -600,7 +590,6 @@ input:checked+.slider:before {
     margin-bottom: 25px;
 }
 
-/* ===================== GRID DINÁMICO ===================== */
 .dynamic-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

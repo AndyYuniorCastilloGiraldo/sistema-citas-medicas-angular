@@ -19,7 +19,6 @@ export class UsuarioService {
     return this.http.get<UsuarioResponse>(`${this.apiUrl}/obtener/${id}`);
   }
 
-  // 🔥 SOLO ESTE MÉTODO PARA CREAR
   crear(request: UsuarioRequest): Observable<UsuarioResponse> {
     return this.http.post<UsuarioResponse>(`${this.apiUrl}/crear`, request);
   }

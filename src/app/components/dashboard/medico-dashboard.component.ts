@@ -38,7 +38,6 @@ export class MedicoDashboardComponent implements OnInit {
 
         this.medicoService.listar().subscribe({
             next: (medicos) => {
-                // Buscar médico por correo o CMP (según cómo se creó el usuario)
                 this.currentMedico = medicos.find(m => m.correo === username || m.cmp === username) || null;
 
                 if (this.currentMedico) {
@@ -54,14 +53,11 @@ export class MedicoDashboardComponent implements OnInit {
     cargarCitas(idMedico: number): void {
         this.citaService.listar().subscribe({
             next: (allCitas) => {
-                // Filtrar citas del médico y que no estén canceladas
                 this.citas = allCitas.filter(c => c.idMedico === idMedico && c.estado !== 'CANCELADA');
 
-                // Calcular stats
                 const hoy = new Date().toISOString().split('T')[0];
                 this.stats.citasHoy = this.citas.filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
 
-                // Total de pacientes únicos
                 const pacientesUnicos = new Set(this.citas.map(c => c.idPaciente));
                 this.stats.totalPacientes = pacientesUnicos.size;
 
@@ -75,12 +71,10 @@ export class MedicoDashboardComponent implements OnInit {
         if (confirm('¿Desea marcar esta cita como ATENDIDA?')) {
             this.citaService.atender(idCita).subscribe({
                 next: () => {
-                    // Actualizar el estado localmente para reflejar el cambio en la UI
                     const cita = this.citas.find(c => c.idCita === idCita);
                     if (cita) {
                         cita.estado = 'ATENDIDA';
                     }
-                    // Recalcular estadísticas
                     const hoy = new Date().toISOString().split('T')[0];
                     this.stats.citasHoy = this.citas.filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
                 },

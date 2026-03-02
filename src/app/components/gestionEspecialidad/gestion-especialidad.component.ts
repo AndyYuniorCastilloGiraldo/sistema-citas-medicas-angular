@@ -46,9 +46,6 @@ export class GestionEspecialidadComponent implements OnInit {
         this.cargarEspecialidades();
     }
 
-    // =========================
-    // CARGAR ESPECIALIDADES
-    // =========================
 
     cargarEspecialidades(): void {
         this.isLoading = true;
@@ -77,9 +74,6 @@ export class GestionEspecialidadComponent implements OnInit {
         });
     }
 
-    // =========================
-    // REGISTRAR
-    // =========================
 
     openModal(): void {
         this.showModal = true;
@@ -120,9 +114,6 @@ export class GestionEspecialidadComponent implements OnInit {
             });
     }
 
-    // =========================
-    // EDITAR
-    // =========================
 
     openEditModal(especialidad: EspecialidadResponse): void {
         this.especialidadEditar = { ...especialidad };
@@ -162,9 +153,6 @@ export class GestionEspecialidadComponent implements OnInit {
             });
     }
 
-    // =========================
-    // ELIMINAR
-    // =========================
 
     deleteEspecialidad(id: number): void {
         this.idToDelete = id;

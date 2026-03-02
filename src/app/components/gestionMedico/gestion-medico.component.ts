@@ -47,7 +47,7 @@ export class GestionMedicoComponent implements OnInit {
     apellidos: '',
     cmp: '',
     telefono: '',
-    correo: '',       // Aquí el correo será usado como username
+    correo: '',
     idEspecialidad: 0
   };
 
@@ -58,9 +58,7 @@ export class GestionMedicoComponent implements OnInit {
     this.cargarEspecialidades();
   }
 
-  // =========================
-  // CARGAR DATOS
-  // =========================
+
   cargarMedicos(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -94,9 +92,7 @@ export class GestionMedicoComponent implements OnInit {
     );
   }
 
-  // =========================
-  // REGISTRAR MÉDICO Y USUARIO
-  // =========================
+
   openModal(): void {
     this.showModal = true;
     this.successMessage = '';
@@ -125,10 +121,8 @@ export class GestionMedicoComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    // 1️⃣ CREAR MÉDICO
     this.medicoService.crear(this.nuevoMedico).subscribe({
       next: () => {
-        // 2️⃣ CREAR USUARIO con correo como email
         const usuarioReq: UsuarioRequest = {
           username: this.nuevoMedico.nombres,
           email: this.nuevoMedico.correo.trim(),
@@ -158,9 +152,7 @@ export class GestionMedicoComponent implements OnInit {
     });
   }
 
-  // =========================
-  // EDITAR MÉDICO
-  // =========================
+
   openEditModal(medico: MedicoResponse): void {
     this.medicoEditar = { ...medico };
     this.editSuccessMessage = '';
@@ -202,9 +194,7 @@ export class GestionMedicoComponent implements OnInit {
     });
   }
 
-  // =========================
-  // ELIMINAR MÉDICO
-  // =========================
+
   deleteMedico(id: number): void {
     this.idToDelete = id;
     this.showDeleteModal = true;

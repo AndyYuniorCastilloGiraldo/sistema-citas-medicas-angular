@@ -1,6 +1,6 @@
 export interface CitaRequest {
-    fecha: string; // ISO Date
-    hora: string; // ISO Time
+    fecha: string;
+    hora: string;
     motivo: string;
     observaciones: string;
     idPaciente: number;

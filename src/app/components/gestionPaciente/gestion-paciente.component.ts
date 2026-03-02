@@ -53,9 +53,7 @@ export class GestionPacienteComponent implements OnInit {
         this.cargarPacientes();
     }
 
-    // =========================
-    // LISTAR
-    // =========================
+
     cargarPacientes(): void {
         this.isLoading = true;
 
@@ -81,9 +79,7 @@ export class GestionPacienteComponent implements OnInit {
         );
     }
 
-    // =========================
-    // REGISTRAR
-    // =========================
+
     openModal(): void {
         this.showModal = true;
         this.successMessage = '';
@@ -104,7 +100,6 @@ export class GestionPacienteComponent implements OnInit {
 
     registrarPaciente(): void {
 
-        // 🔥 NORMALIZAR CORREO (CLAVE DEL PROBLEMA)
         this.nuevoPaciente.correo = this.nuevoPaciente.correo
             .trim()
             .toLowerCase();
@@ -127,11 +122,9 @@ export class GestionPacienteComponent implements OnInit {
 
         this.isSaving = true;
 
-        // 1️⃣ CREAR PACIENTE
         this.pacienteService.crear(this.nuevoPaciente).subscribe({
             next: () => {
 
-                // 2️⃣ CREAR USUARIO (MISMO CORREO = EMAIL)
                 const usuarioReq: UsuarioRequest = {
                     username: this.nuevoPaciente.nombres,
                     email: this.nuevoPaciente.correo,
@@ -166,9 +159,7 @@ Password: ${usuarioReq.password}`;
         });
     }
 
-    // =========================
-    // EDITAR
-    // =========================
+
     openEditModal(paciente: PacienteResponse): void {
         this.pacienteEditar = { ...paciente };
         this.showEditModal = true;
@@ -208,9 +199,7 @@ Password: ${usuarioReq.password}`;
             });
     }
 
-    // =========================
-    // ELIMINAR
-    // =========================
+
     deletePaciente(id: number): void {
         this.idToDelete = id;
         this.showDeleteModal = true;

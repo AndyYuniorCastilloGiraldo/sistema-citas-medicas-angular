@@ -5,13 +5,11 @@
                 }}</span></p>
     </header>
 
-    <!-- LOADING STATE -->
     <div *ngIf="isLoading" class="loader-container">
         <div class="spinner"></div>
         <p>Cargando información del dashboard...</p>
     </div>
 
-    <!-- DASHBOARD CONTENT -->
     <div *ngIf="!isLoading">
         <div class="stats-grid">
             <div class="stat-card emerald">
@@ -44,11 +42,10 @@
             </div>
 
             <div class="appointment-list">
-                <!-- ITERATE OVER CITAS -->
                 <div class="appointment-card" *ngFor="let cita of citas">
                     <div class="time-box">
                         <span class="time">{{ cita.hora.split(':')[0] + ':' + cita.hora.split(':')[1] }}</span>
-                        <!-- Determinar AM/PM si es necesario, o solo mostrar hora -->
+                        <span class="time">{{ cita.hora.split(':')[0] + ':' + cita.hora.split(':')[1] }}</span>
                     </div>
                     <div class="patient-profile">
                         <div class="avatar-sm">{{ cita.nombrePaciente.charAt(0) }}</div>
@@ -72,7 +69,6 @@
                     </div>
                 </div>
 
-                <!-- EMPTY STATE -->
                 <div class="empty-state" *ngIf="citas.length === 0">
                     <i class="fas fa-calendar-times"></i>
                     <p>No tiene citas programadas.</p>

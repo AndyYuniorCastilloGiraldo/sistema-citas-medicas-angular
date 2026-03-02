@@ -22,7 +22,7 @@ export class RegisterComponent {
     registerData: RegisterRequest = {
         email: '',
         password: '',
-        rolId: 2 // Por defecto rol de usuario
+        rolId: 2
     };
 
     pacienteData: PacienteRequest = {
@@ -46,18 +46,15 @@ export class RegisterComponent {
         this.isLoading = true;
         this.errorMessage = '';
 
-        // 1️⃣ REGISTRAR USUARIO
         this.authService.register(this.registerData).subscribe({
             next: () => {
 
-                // 2️⃣ LOGIN AUTOMÁTICO con email
                 this.authService.login({
                     email: this.registerData.email,
                     password: this.registerData.password
                 }).subscribe({
                     next: () => {
 
-                        // 3️⃣ YA HAY TOKEN → CREAR PACIENTE
                         this.pacienteData.correo = this.registerData.email;
 
                         this.pacienteService.crear(this.pacienteData).subscribe({

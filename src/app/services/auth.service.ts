@@ -22,7 +22,6 @@ export class AuthService {
         return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
             tap(response => {
                 if (this.isBrowser()) {
-                    // Normalizar el rol eliminando el prefijo ROLE_ si existe
                     const normalizedRole = response.rol.replace('ROLE_', '');
                     localStorage.setItem('token', response.token);
                     localStorage.setItem('email', response.username);

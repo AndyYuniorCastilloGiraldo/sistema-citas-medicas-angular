@@ -63,9 +63,6 @@ export class GestionUsuarioComponent implements OnInit {
         this.cargarUsuarios();
     }
 
-    // =========================
-    // CARGAR USUARIOS
-    // =========================
 
     cargarUsuarios(): void {
         this.isLoading = true;
@@ -95,14 +92,12 @@ export class GestionUsuarioComponent implements OnInit {
     getNombreReal(username: string): string {
         const u = username.toLowerCase().trim();
 
-        // Buscar en médicos
         const medico = this.medicos.find(m =>
             m.correo?.toLowerCase().trim() === u ||
             m.cmp?.toLowerCase().trim() === u
         );
         if (medico) return `${medico.nombres} ${medico.apellidos}`;
 
-        // Buscar en pacientes
         const paciente = this.pacientes.find(p => p.correo?.toLowerCase().trim() === u);
         if (paciente) return `${paciente.nombres} ${paciente.apellidos}`;
 
@@ -127,9 +122,6 @@ export class GestionUsuarioComponent implements OnInit {
         });
     }
 
-    // =========================
-    // REGISTRAR
-    // =========================
 
     openModal(): void {
         this.showModal = true;
@@ -151,12 +143,12 @@ export class GestionUsuarioComponent implements OnInit {
             return;
         }
 
-        if (this.nuevoUsuario.rolId === 2) { // Paciente
+        if (this.nuevoUsuario.rolId === 2) {
             if (!this.nuevoPaciente.apellidos || !this.nuevoPaciente.dni) {
                 alert('Complete los datos obligatorios del paciente (Apellidos, DNI)');
                 return;
             }
-        } else if (this.nuevoUsuario.rolId === 3) { // Medico
+        } else if (this.nuevoUsuario.rolId === 3) {
             if (!this.nuevoMedico.apellidos || !this.nuevoMedico.cmp || !this.nuevoMedico.idEspecialidad) {
                 alert('Complete los datos obligatorios del médico (Apellidos, CMP, Especialidad)');
                 return;
@@ -177,14 +169,14 @@ export class GestionUsuarioComponent implements OnInit {
         };
 
         const createProfile = () => {
-            if (this.nuevoUsuario.rolId === 2) { // Paciente
+            if (this.nuevoUsuario.rolId === 2) {
                 this.nuevoPaciente.correo = this.nuevoUsuario.email;
                 this.nuevoPaciente.nombres = this.nuevoUsuario.username;
                 this.pacienteService.crear(this.nuevoPaciente).subscribe({
                     next: () => finalizeSuccess(),
                     error: () => { this.isSaving = false; alert('Usuario creado pero error al crear perfil de paciente'); }
                 });
-            } else if (this.nuevoUsuario.rolId === 3) { // Medico
+            } else if (this.nuevoUsuario.rolId === 3) {
                 this.nuevoMedico.correo = this.nuevoUsuario.email;
                 this.nuevoMedico.nombres = this.nuevoUsuario.username;
                 this.medicoService.crear(this.nuevoMedico).subscribe({
@@ -210,9 +202,6 @@ export class GestionUsuarioComponent implements OnInit {
         });
     }
 
-    // =========================
-    // EDITAR
-    // =========================
 
     openEditModal(usuario: UsuarioResponse): void {
         this.usuarioEditar = { ...usuario };
@@ -293,9 +282,6 @@ export class GestionUsuarioComponent implements OnInit {
         }
     }
 
-    // =========================
-    // CAMBIAR ESTADO
-    // =========================
 
     toggleEstado(usuario: UsuarioResponse): void {
         const nuevoEstado = !usuario.estado;
@@ -308,9 +294,6 @@ export class GestionUsuarioComponent implements OnInit {
             });
     }
 
-    // =========================
-    // ELIMINAR
-    // =========================
 
     deleteUsuario(id: number): void {
         this.idToDelete = id;
@@ -341,9 +324,6 @@ export class GestionUsuarioComponent implements OnInit {
             });
     }
 
-    // =========================
-    // NAVEGACIÓN
-    // =========================
 
     volverAlDashboard(): void {
         this.router.navigate(['/']);
